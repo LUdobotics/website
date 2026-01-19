@@ -5,8 +5,8 @@ import { Section } from './ui/Section';
 import solutionImage from '../assets/solutions_image.png';
 
 const values = [
-  { icon: Gamepad2, text: "Learn ROS2 by doing, inside the Virtual World" },
-  { icon: Microscope, text: "High-fidelity robotics simulation matching real ROS2 behavior" },
+  { icon: Gamepad2, text: "Learn ROS 2 by doing, inside the Virtual World" },
+  { icon: Microscope, text: "High-fidelity robotics simulation matching real ROS 2 behavior" },
   { icon: Lightbulb, text: "Instant feedback, hints, and debugging support" },
   { icon: TrendingUp, text: "Seamless progression from basics to advanced robotics tasks" },
 ];
@@ -50,11 +50,11 @@ export const Solution: React.FC = () => {
             </span>
             <h2 className="font-orbitron text-3xl md:text-5xl font-bold text-white mb-6">
               Game-Based <br />
-              <span className="text-ludo-green">ROS2 Mastery</span>
+              <span className="text-ludo-green">ROS 2 Mastery</span>
             </h2>
 
             <p className="font-grotesk text-lg text-ludo-muted mb-10 leading-relaxed">
-              Ludobotics introduces an intelligent learning layer that turns ROS2 concepts into interactive missions, story-driven exploration, and real robot challenges — bridging the gap between theory and application.
+              Ludobotics introduces an intelligent learning layer that turns ROS 2 concepts into interactive missions, story-driven exploration, and real robot challenges — bridging the gap between theory and application.
             </p>
 
             <div className="space-y-6">

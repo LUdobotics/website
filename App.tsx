@@ -26,7 +26,7 @@ function App() {
     <div className="min-h-screen bg-ludo-deep text-white selection:bg-ludo-cyan selection:text-ludo-deep">
       <Navbar onOpenBeta={openBeta} />
       <main>
-        <Hero />
+        <Hero onOpenBeta={openBeta} />
         <Problem />
         <Solution />
         <Features />

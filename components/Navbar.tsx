@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, ChevronRight } from 'lucide-react';
 import { NAV_ITEMS } from '../constants';
 import { motion, AnimatePresence } from 'framer-motion';
 import navLogo from '../assets/footer_logo.png';
@@ -29,9 +29,9 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenBeta }) => {
     }
   };
 
-  const handleBetaClick = () => {
+  const handleSneakPeekClick = () => {
     setMobileMenuOpen(false);
-    onOpenBeta();
+    // Placeholder for Sneak Peek action
   };
 
   return (
@@ -61,10 +61,10 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenBeta }) => {
             </button>
           ))}
           <button
-            onClick={handleBetaClick}
-            className="px-6 py-2 border border-ludo-cyan text-ludo-cyan font-orbitron text-xs font-bold hover:bg-ludo-cyan hover:text-ludo-deep transition-all uppercase tracking-wider"
+            onClick={handleSneakPeekClick}
+            className="px-6 py-2 border border-ludo-cyan text-ludo-cyan font-orbitron text-xs font-bold hover:bg-ludo-cyan hover:text-ludo-deep transition-all uppercase tracking-wider flex items-center gap-2"
           >
-            Join Beta
+            Sneak Peek <ChevronRight size={16} />
           </button>
         </div>
 
@@ -96,10 +96,10 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenBeta }) => {
               </button>
             ))}
             <button
-              onClick={handleBetaClick}
-              className="mt-8 px-8 py-3 bg-ludo-cyan text-ludo-deep font-bold font-orbitron uppercase"
+              onClick={handleSneakPeekClick}
+              className="mt-8 px-8 py-3 bg-ludo-cyan text-ludo-deep font-bold font-orbitron uppercase flex items-center gap-2"
             >
-              Join Beta
+              Sneak Peek <ChevronRight size={20} />
             </button>
           </motion.div>
         )}

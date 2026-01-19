@@ -1,11 +1,11 @@
-import { 
-  Gamepad2, 
-  Cpu, 
-  Zap, 
-  Users, 
-  BarChart, 
-  Layers, 
-  BookOpen, 
+import {
+  Gamepad2,
+  Cpu,
+  Zap,
+  Users,
+  BarChart,
+  Layers,
+  BookOpen,
   AlertTriangle,
   TrendingDown,
   School
@@ -23,7 +23,7 @@ export const PROBLEMS: ProblemCard[] = [
   {
     icon: School,
     title: "Robotics Education Is Hard to Scale",
-    description: "Traditional ROS2 learning requires expensive hardware, lab time, and expert supervision.",
+    description: "Traditional ROS 2 learning requires expensive hardware, lab time, and expert supervision.",
   },
   {
     icon: BookOpen,
@@ -33,7 +33,7 @@ export const PROBLEMS: ProblemCard[] = [
   {
     icon: TrendingDown,
     title: "Students Struggle to Stay Motivated",
-    description: "ROS2 has a steep learning curve & plenty of static documentation, leading to frustration.",
+    description: "ROS 2 has a steep learning curve & plenty of static documentation, leading to frustration.",
   },
 ];
 
@@ -41,7 +41,7 @@ export const FEATURES: Feature[] = [
   {
     icon: Zap,
     title: "Code + Gameplay Sync",
-    description: "Edit ROS2 nodes and see results instantly in the simulation.",
+    description: "Edit ROS 2 nodes with instant feedback using game-code that is natively compatible with real-world robots.",
   },
   {
     icon: Layers,
@@ -64,7 +64,7 @@ export const METRICS: Metric[] = [
   {
     value: "70",
     suffix: "%",
-    label: "Faster ROS2 Mastery",
+    label: "Faster ROS 2 Mastery",
     description: "Gamified repetition and narrative reinforcement deliver faster skill acquisition.",
   },
   {
@@ -99,6 +99,6 @@ export const ROADMAP: RoadmapItem[] = [
   {
     date: "Beyond 2026",
     title: "Continuous Expansion",
-    description: "We introduce new learning units, advanced ROS2 missions, and the Next Odyssey!",
+    description: "We introduce new learning units, advanced ROS 2 missions, and the Next Odyssey!",
   },
 ];

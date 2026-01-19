@@ -38,7 +38,7 @@ export const BetaModal: React.FC<BetaModalProps> = ({ isOpen, onClose }) => {
               className="w-full max-w-lg pointer-events-auto"
             >
               <div className="bg-ludo-panel border border-ludo-cyan/30 rounded-2xl shadow-[0_0_50px_rgba(0,255,255,0.15)] relative overflow-hidden backdrop-blur-xl">
-                
+
                 {/* Decorative Elements */}
                 <div className="absolute inset-0 bg-grid-pattern opacity-10 pointer-events-none" />
                 <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-ludo-cyan to-transparent opacity-50" />
@@ -54,7 +54,7 @@ export const BetaModal: React.FC<BetaModalProps> = ({ isOpen, onClose }) => {
                       Join The <span className="text-ludo-cyan">Odyssey</span>
                     </h2>
                   </div>
-                  <button 
+                  <button
                     onClick={onClose}
                     className="text-ludo-muted hover:text-ludo-cyan transition-colors p-2 hover:bg-ludo-cyan/10 rounded-lg"
                   >
@@ -67,44 +67,44 @@ export const BetaModal: React.FC<BetaModalProps> = ({ isOpen, onClose }) => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div className="space-y-2">
                       <label className="font-mono text-xs text-ludo-cyan uppercase tracking-wider pl-1">First Name</label>
-                      <input 
-                        required 
-                        type="text" 
+                      <input
+                        required
+                        type="text"
                         placeholder="Pilot"
-                        className="w-full bg-ludo-deep/60 border border-ludo-border rounded-lg px-4 py-3 text-white placeholder-ludo-muted/30 focus:border-ludo-cyan focus:ring-1 focus:ring-ludo-cyan focus:outline-none transition-all font-grotesk" 
+                        className="w-full bg-ludo-deep/60 border border-ludo-border rounded-lg px-4 py-3 text-white placeholder-ludo-muted/30 focus:border-ludo-cyan focus:ring-1 focus:ring-ludo-cyan focus:outline-none transition-all font-grotesk"
                       />
                     </div>
                     <div className="space-y-2">
-                       <label className="font-mono text-xs text-ludo-cyan uppercase tracking-wider pl-1">Last Name</label>
-                       <input 
-                         required 
-                         type="text" 
-                         placeholder="Name"
-                         className="w-full bg-ludo-deep/60 border border-ludo-border rounded-lg px-4 py-3 text-white placeholder-ludo-muted/30 focus:border-ludo-cyan focus:ring-1 focus:ring-ludo-cyan focus:outline-none transition-all font-grotesk" 
-                       />
+                      <label className="font-mono text-xs text-ludo-cyan uppercase tracking-wider pl-1">Last Name</label>
+                      <input
+                        required
+                        type="text"
+                        placeholder="Name"
+                        className="w-full bg-ludo-deep/60 border border-ludo-border rounded-lg px-4 py-3 text-white placeholder-ludo-muted/30 focus:border-ludo-cyan focus:ring-1 focus:ring-ludo-cyan focus:outline-none transition-all font-grotesk"
+                      />
                     </div>
-                  </div>
-                  
-                  <div className="space-y-2">
-                     <label className="font-mono text-xs text-ludo-cyan uppercase tracking-wider pl-1">Email Coordinates</label>
-                     <input 
-                       required 
-                       type="email" 
-                       placeholder="pilot@university.edu"
-                       className="w-full bg-ludo-deep/60 border border-ludo-border rounded-lg px-4 py-3 text-white placeholder-ludo-muted/30 focus:border-ludo-cyan focus:ring-1 focus:ring-ludo-cyan focus:outline-none transition-all font-grotesk" 
-                     />
                   </div>
 
                   <div className="space-y-2">
-                     <div className="flex justify-between pl-1">
-                       <label className="font-mono text-xs text-ludo-cyan uppercase tracking-wider">Comms Link (Mobile)</label>
-                       <span className="font-mono text-xs text-ludo-muted italic lowercase">optional</span>
-                     </div>
-                     <input 
-                       type="tel" 
-                       placeholder="+1 (555) 000-0000"
-                       className="w-full bg-ludo-deep/60 border border-ludo-border rounded-lg px-4 py-3 text-white placeholder-ludo-muted/30 focus:border-ludo-cyan focus:ring-1 focus:ring-ludo-cyan focus:outline-none transition-all font-grotesk" 
-                     />
+                    <label className="font-mono text-xs text-ludo-cyan uppercase tracking-wider pl-1">Email Coordinates</label>
+                    <input
+                      required
+                      type="email"
+                      placeholder="pilot@university.edu"
+                      className="w-full bg-ludo-deep/60 border border-ludo-border rounded-lg px-4 py-3 text-white placeholder-ludo-muted/30 focus:border-ludo-cyan focus:ring-1 focus:ring-ludo-cyan focus:outline-none transition-all font-grotesk"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex justify-between pl-1">
+                      <label className="font-mono text-xs text-ludo-cyan uppercase tracking-wider">Comms Link (Mobile)</label>
+                      <span className="font-mono text-xs text-ludo-muted italic lowercase">optional</span>
+                    </div>
+                    <input
+                      type="tel"
+                      placeholder="+1 (555) 000-0000"
+                      className="w-full bg-ludo-deep/60 border border-ludo-border rounded-lg px-4 py-3 text-white placeholder-ludo-muted/30 focus:border-ludo-cyan focus:ring-1 focus:ring-ludo-cyan focus:outline-none transition-all font-grotesk"
+                    />
                   </div>
 
                   <div className="pt-4">
@@ -112,7 +112,7 @@ export const BetaModal: React.FC<BetaModalProps> = ({ isOpen, onClose }) => {
                       Initialize Application
                     </Button>
                     <p className="text-center mt-4 font-mono text-[10px] text-ludo-muted">
-                      By initializing, you agree to our Beta testing protocols.
+                      You can withdraw your consent for data processing at any time. You also have the 'Right to be Forgotten' to request data deletion. To exercise these rights, please contact us at <a href="mailto:ludobotics@gmail.com" className="text-ludo-cyan hover:underline">ludobotics@gmail.com</a>. Your data will be erased without undue delay if conditions are met.
                     </p>
                   </div>
                 </form>

@@ -6,7 +6,11 @@ import { Section } from './ui/Section';
 import { VideoModal } from './ui/VideoModal';
 import heroImage from '../assets/hero_image.png';
 
-export const Hero: React.FC = () => {
+interface HeroProps {
+  onOpenBeta: () => void;
+}
+
+export const Hero: React.FC<HeroProps> = ({ onOpenBeta }) => {
   const [isVideoOpen, setIsVideoOpen] = useState(false);
 
   return (
@@ -38,23 +42,23 @@ export const Hero: React.FC = () => {
             </motion.div>
 
             <h1 className="font-orbitron text-5xl md:text-7xl font-black leading-tight mb-6">
-              Experience <span className="text-transparent bg-clip-text bg-gradient-to-r from-ludo-cyan to-ludo-blue">ROS2</span> like never before
+              Experience <span className="text-transparent bg-clip-text bg-gradient-to-r from-ludo-cyan to-ludo-blue">ROS 2</span> like never before
             </h1>
 
             <p className="font-grotesk text-lg md:text-xl text-ludo-muted mb-4 max-w-xl">
-              An immersive, game-based learning platform that transforms how ROS2 is learnt, through exploration, problem-solving, and real scenarios.
+              An immersive, game-based learning platform that transforms how ROS 2 is learnt, through exploration, problem-solving, and real scenarios.
             </p>
 
             <p className="font-grotesk text-base text-white/80 mb-10 max-w-lg border-l-2 border-ludo-orange pl-4 italic">
-              Our first title — <span className="text-white font-bold">The Odyssey</span> — turns ROS2 learning into an interactive space adventure powered by real robotics workflows.
+              Our first title — <span className="text-white font-bold">The Odyssey</span> — turns ROS 2 learning into an interactive space adventure powered by real robotics workflows. 
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4">
               <Button icon={<PlayCircle size={20} />} onClick={() => setIsVideoOpen(true)}>
                 Watch Trailer
               </Button>
-              <Button variant="secondary" icon={<ChevronRight size={20} />}>
-                Sneak Peek
+              <Button variant="secondary" onClick={onOpenBeta}>
+                Join Beta
               </Button>
             </div>
           </motion.div>
@@ -77,7 +81,7 @@ export const Hero: React.FC = () => {
               {/* Overlay UI Mockup Elements */}
               <div className="absolute top-4 left-4 right-4 flex justify-between font-mono text-xs text-ludo-cyan">
                 <span>SYS.ONLINE</span>
-                <span>ROS2: ACTIVE</span>
+                <span>ROS 2: ACTIVE</span>
               </div>
 
 
@@ -89,7 +93,7 @@ export const Hero: React.FC = () => {
               transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
               className="absolute -top-10 -right-10 w-24 h-24 border border-ludo-magenta/30 bg-ludo-deep/80 backdrop-blur rounded-lg flex items-center justify-center"
             >
-              <span className="font-orbitron font-bold text-2xl text-ludo-magenta">ROS2</span>
+              <span className="font-orbitron font-bold text-2xl text-ludo-magenta">ROS 2</span>
             </motion.div>
           </motion.div>
 
