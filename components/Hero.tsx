@@ -20,7 +20,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenBeta }) => {
       <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-ludo-cyan/10 rounded-full blur-[150px] -translate-y-1/2 translate-x-1/2" />
       <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-ludo-magenta/10 rounded-full blur-[150px] translate-y-1/2 -translate-x-1/2" />
 
-      <div className="container mx-auto px-6 relative z-10 pt-20">
+      <div className="container mx-auto px-6 relative z-10 pt-32 md:pt-20">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
 
           {/* Content */}
@@ -50,7 +50,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenBeta }) => {
             </p>
 
             <p className="font-grotesk text-base text-white/80 mb-10 max-w-lg border-l-2 border-ludo-orange pl-4 italic">
-              Our first title — <span className="text-white font-bold">The Odyssey</span> — turns ROS 2 learning into an interactive space adventure powered by real robotics workflows. 
+              Our first title — <span className="text-white font-bold">The Odyssey</span> — turns ROS 2 learning into an interactive space adventure powered by real robotics workflows.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4">
@@ -68,14 +68,14 @@ export const Hero: React.FC<HeroProps> = ({ onOpenBeta }) => {
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="relative"
+            className="relative mt-16 md:mt-0"
           >
-            <div className="relative w-full aspect-square md:aspect-[4/3] rounded-2xl overflow-hidden border border-ludo-border bg-ludo-panel/50 backdrop-blur-sm shadow-[0_0_50px_rgba(0,255,255,0.1)] group">
+            <div className="relative w-full rounded-2xl overflow-hidden border border-ludo-border bg-ludo-panel/50 backdrop-blur-sm shadow-[0_0_50px_rgba(0,255,255,0.1)] group">
               {/* Mockup Image Placeholder */}
               <img
                 src={heroImage}
                 alt="The Odyssey Gameplay"
-                className="w-full h-full object-cover transition-all duration-700"
+                className="w-full h-auto transition-all duration-700"
               />
 
               {/* Overlay UI Mockup Elements */}
@@ -91,7 +91,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenBeta }) => {
             <motion.div
               animate={{ y: [0, -20, 0] }}
               transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
-              className="absolute -top-10 -right-10 w-24 h-24 border border-ludo-magenta/30 bg-ludo-deep/80 backdrop-blur rounded-lg flex items-center justify-center"
+              className="absolute -top-10 right-4 md:-right-10 w-24 h-24 border border-ludo-magenta/30 bg-ludo-deep/80 backdrop-blur rounded-lg flex items-center justify-center"
             >
               <span className="font-orbitron font-bold text-2xl text-ludo-magenta">ROS 2</span>
             </motion.div>

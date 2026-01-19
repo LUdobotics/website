@@ -9,14 +9,19 @@ import { Roadmap } from './components/Roadmap';
 import { CTA } from './components/CTA';
 import { Footer } from './components/Footer';
 import { BetaModal } from './components/BetaModal';
+import { CarouselModal } from './components/CarouselModal';
 import { TRDPage } from './components/TRDPage';
 
 function App() {
   const [isBetaModalOpen, setIsBetaModalOpen] = useState(false);
+  const [isSneakPeekOpen, setIsSneakPeekOpen] = useState(false);
   const [view, setView] = useState<'landing' | 'trd'>('landing');
 
   const openBeta = () => setIsBetaModalOpen(true);
   const closeBeta = () => setIsBetaModalOpen(false);
+
+  const openSneakPeek = () => setIsSneakPeekOpen(true);
+  const closeSneakPeek = () => setIsSneakPeekOpen(false);
 
   if (view === 'trd') {
     return <TRDPage onBack={() => setView('landing')} />;
@@ -24,7 +29,7 @@ function App() {
 
   return (
     <div className="min-h-screen bg-ludo-deep text-white selection:bg-ludo-cyan selection:text-ludo-deep">
-      <Navbar onOpenBeta={openBeta} />
+      <Navbar onOpenBeta={openBeta} onOpenSneakPeek={openSneakPeek} />
       <main>
         <Hero onOpenBeta={openBeta} />
         <Problem />
@@ -36,6 +41,7 @@ function App() {
       </main>
       <Footer onOpenTRD={() => setView('trd')} />
       <BetaModal isOpen={isBetaModalOpen} onClose={closeBeta} />
+      <CarouselModal isOpen={isSneakPeekOpen} onClose={closeSneakPeek} />
     </div>
   );
 }

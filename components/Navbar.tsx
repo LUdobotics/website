@@ -7,9 +7,10 @@ import navLogo from '../assets/footer_logo.png';
 
 interface NavbarProps {
   onOpenBeta: () => void;
+  onOpenSneakPeek: () => void;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ onOpenBeta }) => {
+export const Navbar: React.FC<NavbarProps> = ({ onOpenBeta, onOpenSneakPeek }) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -31,7 +32,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenBeta }) => {
 
   const handleSneakPeekClick = () => {
     setMobileMenuOpen(false);
-    // Placeholder for Sneak Peek action
+    onOpenSneakPeek();
   };
 
   return (
@@ -86,6 +87,12 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenBeta }) => {
             exit={{ opacity: 0, x: '100%' }}
             className="fixed inset-0 bg-ludo-deep z-40 flex flex-col items-center justify-center gap-8 md:hidden"
           >
+            <button
+              className="absolute top-6 right-6 text-white p-2 hover:text-ludo-cyan transition-colors"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              <X size={32} />
+            </button>
             {NAV_ITEMS.map((item) => (
               <button
                 key={item.label}

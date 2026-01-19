@@ -30,7 +30,7 @@ export const Solution: React.FC = () => {
               />
 
               {/* Floating Badge */}
-              <div className="absolute -bottom-6 -right-6 bg-ludo-deep border border-ludo-green p-4 rounded-lg shadow-xl flex items-center gap-3">
+              <div className="absolute -bottom-6 right-4 md:-right-6 bg-ludo-deep border border-ludo-green p-4 rounded-lg shadow-xl flex items-center gap-3">
                 <CheckCircle2 className="text-ludo-green" size={32} />
                 <div>
                   <div className="font-mono text-xs text-ludo-muted uppercase">Status</div>
