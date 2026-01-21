@@ -39,7 +39,7 @@ function App() {
         <Roadmap />
         <CTA onOpenBeta={openBeta} />
       </main>
-      <Footer onOpenTRD={() => setView('trd')} />
+      <Footer />
       <BetaModal isOpen={isBetaModalOpen} onClose={closeBeta} />
       <CarouselModal isOpen={isSneakPeekOpen} onClose={closeSneakPeek} />
     </div>

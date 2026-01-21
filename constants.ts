@@ -1,3 +1,5 @@
+export const GOOGLE_SHEETS_URL = 'https://script.google.com/macros/s/AKfycbwyYFRAh5UqQmjCFsCMtGL0ExiBbhmP_YtSYuCqJiBRJiXtOlHjn9MxU_hsjCVjpUv0Hw/exec';
+
 import {
   Gamepad2,
   Cpu,

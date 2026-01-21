@@ -1,13 +1,9 @@
 import React from 'react';
-import { Linkedin, Mail, FileText } from 'lucide-react';
+import { Linkedin, Mail } from 'lucide-react';
 import footerLogo from '../assets/footer_logo.png';
 
 
-interface FooterProps {
-  onOpenTRD?: () => void;
-}
-
-export const Footer: React.FC<FooterProps> = ({ onOpenTRD }) => {
+export const Footer: React.FC = () => {
   return (
     <footer className="bg-[#010408] border-t border-ludo-border/20 pt-16 pb-8">
       <div className="container mx-auto px-6">
@@ -45,20 +41,9 @@ export const Footer: React.FC<FooterProps> = ({ onOpenTRD }) => {
             </div>
           </div>
 
-          <div>
-            <h4 className="font-orbitron font-bold text-white mb-4">Resources</h4>
-            <div className="flex flex-col gap-3">
-              <button
-                onClick={onOpenTRD}
-                className="flex items-center gap-2 text-ludo-muted hover:text-ludo-cyan transition-colors group text-left"
-              >
-                <FileText size={16} className="group-hover:scale-110 transition-transform" />
-                <span className="font-grotesk text-sm">Technical Requirements</span>
-              </button>
-            </div>
-          </div>
 
-          <div>
+
+          <div className="md:col-start-4">
             <h4 className="font-orbitron font-bold text-white mb-4">Contact</h4>
             <a href="mailto:ludobotics@gmail.com" className="flex items-center gap-2 text-ludo-muted hover:text-white transition-colors">
               <Mail size={16} />

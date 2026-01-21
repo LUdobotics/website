@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Terminal } from 'lucide-react';
 import { Button } from './ui/Button';
+import { GOOGLE_SHEETS_URL } from '../constants';
 
 interface BetaModalProps {
   isOpen: boolean;
@@ -9,11 +10,39 @@ interface BetaModalProps {
 }
 
 export const BetaModal: React.FC<BetaModalProps> = ({ isOpen, onClose }) => {
-  const handleSubmit = (e: React.FormEvent) => {
+  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [errorMessage, setErrorMessage] = useState('');
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Placeholder for submission logic
-    alert("Transmission Received. Welcome to the Beta Program.");
-    onClose();
+    setStatus('loading');
+    setErrorMessage('');
+
+    const formData = new FormData(e.target as HTMLFormElement);
+    const data = Object.fromEntries(formData.entries());
+
+    try {
+      const response = await fetch(GOOGLE_SHEETS_URL, {
+        method: 'POST',
+        mode: 'no-cors', // Apps Script requires no-cors if not using specialized headers
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      // With 'no-cors', we can't read the response body, 
+      // but we can assume success if no error is thrown by fetch.
+      setStatus('success');
+      setTimeout(() => {
+        onClose();
+        setStatus('idle');
+      }, 3000);
+    } catch (err) {
+      console.error('Submission error:', err);
+      setStatus('error');
+      setErrorMessage('Communication failure. Please try again or contact us directly.');
+    }
   };
 
   return (
@@ -63,12 +92,13 @@ export const BetaModal: React.FC<BetaModalProps> = ({ isOpen, onClose }) => {
                 </div>
 
                 {/* Form */}
-                <form onSubmit={handleSubmit} className="p-8 space-y-5 relative z-10">
+                <form onSubmit={handleSubmit} className="p-8 space-y-5 relative z-10 w-full max-h-[85vh] overflow-y-auto custom-scrollbar">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div className="space-y-2">
                       <label className="font-mono text-xs text-ludo-cyan uppercase tracking-wider pl-1">First Name</label>
                       <input
                         required
+                        name="firstName"
                         type="text"
                         placeholder="Pilot"
                         className="w-full bg-ludo-deep/60 border border-ludo-border rounded-lg px-4 py-3 text-white placeholder-ludo-muted/30 focus:border-ludo-cyan focus:ring-1 focus:ring-ludo-cyan focus:outline-none transition-all font-grotesk"
@@ -78,6 +108,7 @@ export const BetaModal: React.FC<BetaModalProps> = ({ isOpen, onClose }) => {
                       <label className="font-mono text-xs text-ludo-cyan uppercase tracking-wider pl-1">Last Name</label>
                       <input
                         required
+                        name="lastName"
                         type="text"
                         placeholder="Name"
                         className="w-full bg-ludo-deep/60 border border-ludo-border rounded-lg px-4 py-3 text-white placeholder-ludo-muted/30 focus:border-ludo-cyan focus:ring-1 focus:ring-ludo-cyan focus:outline-none transition-all font-grotesk"
@@ -89,8 +120,20 @@ export const BetaModal: React.FC<BetaModalProps> = ({ isOpen, onClose }) => {
                     <label className="font-mono text-xs text-ludo-cyan uppercase tracking-wider pl-1">Email Coordinates</label>
                     <input
                       required
+                      name="email"
                       type="email"
                       placeholder="pilot@university.edu"
+                      className="w-full bg-ludo-deep/60 border border-ludo-border rounded-lg px-4 py-3 text-white placeholder-ludo-muted/30 focus:border-ludo-cyan focus:ring-1 focus:ring-ludo-cyan focus:outline-none transition-all font-grotesk"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="font-mono text-xs text-ludo-cyan uppercase tracking-wider pl-1">LinkedIn / Other Socials</label>
+                    <input
+                      required
+                      name="socials"
+                      type="text"
+                      placeholder="linkedin.com/in/pilot"
                       className="w-full bg-ludo-deep/60 border border-ludo-border rounded-lg px-4 py-3 text-white placeholder-ludo-muted/30 focus:border-ludo-cyan focus:ring-1 focus:ring-ludo-cyan focus:outline-none transition-all font-grotesk"
                     />
                   </div>
@@ -101,6 +144,7 @@ export const BetaModal: React.FC<BetaModalProps> = ({ isOpen, onClose }) => {
                       <span className="font-mono text-xs text-ludo-muted italic lowercase">optional</span>
                     </div>
                     <input
+                      name="phone"
                       type="tel"
                       placeholder="+1 (555) 000-0000"
                       className="w-full bg-ludo-deep/60 border border-ludo-border rounded-lg px-4 py-3 text-white placeholder-ludo-muted/30 focus:border-ludo-cyan focus:ring-1 focus:ring-ludo-cyan focus:outline-none transition-all font-grotesk"
@@ -108,9 +152,40 @@ export const BetaModal: React.FC<BetaModalProps> = ({ isOpen, onClose }) => {
                   </div>
 
                   <div className="pt-4">
-                    <Button className="w-full group">
-                      Initialize Application
+                    <Button
+                      type="submit"
+                      disabled={status === 'loading' || status === 'success'}
+                      className="w-full group relative overflow-hidden"
+                    >
+                      <span className={status === 'idle' ? 'opacity-100' : 'opacity-0'}>
+                        Initialize Application
+                      </span>
+
+                      {status === 'loading' && (
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <div className="w-5 h-5 border-2 border-ludo-deep border-t-transparent rounded-full animate-spin" />
+                        </div>
+                      )}
+
+                      {status === 'success' && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-green-500/20 text-green-400 font-mono text-sm">
+                          TRANSMISSION RECEIVED
+                        </div>
+                      )}
                     </Button>
+
+                    {status === 'error' && (
+                      <p className="text-red-400 text-center font-mono text-xs mt-3">
+                        {errorMessage}
+                      </p>
+                    )}
+
+                    {status === 'success' && (
+                      <p className="text-ludo-cyan text-center font-mono text-xs mt-3 animate-pulse">
+                        Welcome to the Beta Program. Closing link...
+                      </p>
+                    )}
+
                     <p className="text-center mt-4 font-mono text-[10px] text-ludo-muted">
                       You can withdraw your consent for data processing at any time. You also have the 'Right to be Forgotten' to request data deletion. To exercise these rights, please contact us at <a href="mailto:ludobotics@gmail.com" className="text-ludo-cyan hover:underline">ludobotics@gmail.com</a>. Your data will be erased without undue delay if conditions are met.
                     </p>
