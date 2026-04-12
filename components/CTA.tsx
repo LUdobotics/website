@@ -74,7 +74,8 @@ export const CTA: React.FC<CTAProps> = ({ onOpenBeta }) => {
                     className="block"
                   >
                     <img 
-                      src="https://librecounter.org/counter.svg?site=ludobotics.com&counter=total&width=150&height=50&color=%23ff00ff" 
+                      src="https://librecounter.org/counter.svg" 
+                      referrerPolicy="no-referrer"
                       alt="Total Visitors"
                     />
                   </a>
@@ -95,7 +96,8 @@ export const CTA: React.FC<CTAProps> = ({ onOpenBeta }) => {
                     className="block"
                   >
                     <img 
-                      src="https://librecounter.org/counter.svg?site=ludobotics.com&counter=today&width=150&height=50&color=%23ff6b35" 
+                      src="https://librecounter.org/counter.svg" 
+                      referrerPolicy="no-referrer"
                       alt="Today's Visits"
                     />
                   </a>
