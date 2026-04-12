@@ -74,8 +74,10 @@ export const CTA: React.FC<CTAProps> = ({ onOpenBeta }) => {
                     className="block"
                   >
                     <img 
-                      src="https://88x31.lol/counter7.gif" 
+                      src="https://88x31.lol/counter11.gif" 
                       alt="Visitor Counter" 
+                      width="176"
+                      height="62"
                       className="mx-auto"
                     />
                   </a>
