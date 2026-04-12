@@ -50,6 +50,49 @@ export const CTA: React.FC<CTAProps> = ({ onOpenBeta }) => {
               Queries
             </a>
           </div>
+
+          {/* View Counter Section - Using LibreCounter */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+            className="mt-16 pt-12 border-t border-ludo-magenta/20"
+          >
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
+              {/* Total Visitors */}
+              <div className="bg-ludo-deep/60 border border-ludo-magenta/30 rounded-xl p-6 relative overflow-hidden group">
+                <div className="absolute inset-0 bg-gradient-to-br from-ludo-magenta/5 to-transparent" />
+                <div className="relative z-10">
+                  <div className="flex items-center justify-center gap-2 mb-3">
+                    <span className="font-mono text-xs text-ludo-magenta uppercase tracking-widest">Total Visitors</span>
+                  </div>
+                  <object
+                    type="text/html"
+                    data="https://librecounter.org/counter/ludobotics.com.html"
+                    className="w-full h-10"
+                    title="Total Visitors"
+                  />
+                </div>
+              </div>
+
+              {/* Today's Visits */}
+              <div className="bg-ludo-deep/60 border border-ludo-orange/30 rounded-xl p-6 relative overflow-hidden group">
+                <div className="absolute inset-0 bg-gradient-to-br from-ludo-orange/5 to-transparent" />
+                <div className="relative z-10">
+                  <div className="flex items-center justify-center gap-2 mb-3">
+                    <span className="font-mono text-xs text-ludo-orange uppercase tracking-widest">Today's Visits</span>
+                  </div>
+                  <object
+                    type="text/html"
+                    data="https://librecounter.org/counter/ludobotics.com/now.html"
+                    className="w-full h-10"
+                    title="Today's Visits"
+                  />
+                </div>
+              </div>
+            </div>
+          </motion.div>
         </motion.div>
       </div>
     </Section>
