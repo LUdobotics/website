@@ -59,13 +59,13 @@ export const CTA: React.FC<CTAProps> = ({ onOpenBeta }) => {
             transition={{ duration: 0.5, delay: 0.3 }}
             className="mt-16 pt-12 border-t border-ludo-magenta/20"
           >
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
-              {/* Total Visitors - Retro counter with numbers */}
+            <div className="max-w-md mx-auto">
+              {/* Single box with counter showing both today and total */}
               <div className="bg-ludo-deep/60 border border-ludo-magenta/30 rounded-xl p-6 relative overflow-hidden group">
                 <div className="absolute inset-0 bg-gradient-to-br from-ludo-magenta/5 to-transparent" />
                 <div className="relative z-10">
-                  <div className="flex items-center justify-center gap-2 mb-3">
-                    <span className="font-mono text-xs text-ludo-magenta uppercase tracking-widest">Total Visitors</span>
+                  <div className="flex items-center justify-center gap-2 mb-4">
+                    <span className="font-mono text-xs text-ludo-cyan uppercase tracking-widest">Visitor Count</span>
                   </div>
                   <a 
                     href="https://88x31.lol" 
@@ -74,32 +74,8 @@ export const CTA: React.FC<CTAProps> = ({ onOpenBeta }) => {
                     className="block"
                   >
                     <img 
-                      src="https://88x31.lol/counter.gif?color=magenta" 
-                      alt="Total Visitors"
-                      width="150"
-                      className="mx-auto"
-                    />
-                  </a>
-                </div>
-              </div>
-
-              {/* Today's Visits - Another counter */}
-              <div className="bg-ludo-deep/60 border border-ludo-orange/30 rounded-xl p-6 relative overflow-hidden group">
-                <div className="absolute inset-0 bg-gradient-to-br from-ludo-orange/5 to-transparent" />
-                <div className="relative z-10">
-                  <div className="flex items-center justify-center gap-2 mb-3">
-                    <span className="font-mono text-xs text-ludo-orange uppercase tracking-widest">Today's Visits</span>
-                  </div>
-                  <a 
-                    href="https://88x31.lol" 
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="block"
-                  >
-                    <img 
-                      src="https://88x31.lol/counter.gif?color=orange" 
-                      alt="Today's Visits"
-                      width="150"
+                      src="https://88x31.lol/counter7.gif" 
+                      alt="Visitor Counter" 
                       className="mx-auto"
                     />
                   </a>
