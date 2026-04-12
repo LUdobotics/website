@@ -67,12 +67,17 @@ export const CTA: React.FC<CTAProps> = ({ onOpenBeta }) => {
                   <div className="flex items-center justify-center gap-2 mb-3">
                     <span className="font-mono text-xs text-ludo-magenta uppercase tracking-widest">Total Visitors</span>
                   </div>
-                  <object
-                    type="text/html"
-                    data="https://librecounter.org/counter/ludobotics.com.html"
-                    className="w-full h-10"
-                    title="Total Visitors"
-                  />
+                  <a 
+                    href="https://librecounter.org/ludobotics.com/show" 
+                    target="_blank"
+                    className="block"
+                  >
+                    <img 
+                      src="https://librecounter.org/counter.svg?site=ludobotics.com&counter=total&width=150&height=50&color=%23ff00ff" 
+                      referrerPolicy="unsafe-url"
+                      alt="Total Visitors"
+                    />
+                  </a>
                 </div>
               </div>
 
@@ -83,12 +88,17 @@ export const CTA: React.FC<CTAProps> = ({ onOpenBeta }) => {
                   <div className="flex items-center justify-center gap-2 mb-3">
                     <span className="font-mono text-xs text-ludo-orange uppercase tracking-widest">Today's Visits</span>
                   </div>
-                  <object
-                    type="text/html"
-                    data="https://librecounter.org/counter/ludobotics.com/now.html"
-                    className="w-full h-10"
-                    title="Today's Visits"
-                  />
+                  <a 
+                    href="https://librecounter.org/ludobotics.com/show" 
+                    target="_blank"
+                    className="block"
+                  >
+                    <img 
+                      src="https://librecounter.org/counter.svg?site=ludobotics.com&counter=today&width=150&height=50&color=%23ff6b35" 
+                      referrerPolicy="unsafe-url"
+                      alt="Today's Visits"
+                    />
+                  </a>
                 </div>
               </div>
             </div>
