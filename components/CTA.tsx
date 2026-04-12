@@ -70,11 +70,11 @@ export const CTA: React.FC<CTAProps> = ({ onOpenBeta }) => {
                   <a 
                     href="https://librecounter.org/ludobotics.com/show" 
                     target="_blank"
+                    rel="noopener noreferrer"
                     className="block"
                   >
                     <img 
                       src="https://librecounter.org/counter.svg?site=ludobotics.com&counter=total&width=150&height=50&color=%23ff00ff" 
-                      referrerPolicy="unsafe-url"
                       alt="Total Visitors"
                     />
                   </a>
@@ -91,11 +91,11 @@ export const CTA: React.FC<CTAProps> = ({ onOpenBeta }) => {
                   <a 
                     href="https://librecounter.org/ludobotics.com/show" 
                     target="_blank"
+                    rel="noopener noreferrer"
                     className="block"
                   >
                     <img 
                       src="https://librecounter.org/counter.svg?site=ludobotics.com&counter=today&width=150&height=50&color=%23ff6b35" 
-                      referrerPolicy="unsafe-url"
                       alt="Today's Visits"
                     />
                   </a>
