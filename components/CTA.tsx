@@ -51,7 +51,7 @@ export const CTA: React.FC<CTAProps> = ({ onOpenBeta }) => {
             </a>
           </div>
 
-          {/* View Counter Section - Using LibreCounter */}
+          {/* View Counter Section - Using 88x31 Retro Counter */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -60,7 +60,7 @@ export const CTA: React.FC<CTAProps> = ({ onOpenBeta }) => {
             className="mt-16 pt-12 border-t border-ludo-magenta/20"
           >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
-              {/* Total Visitors */}
+              {/* Total Visitors - Retro counter with numbers */}
               <div className="bg-ludo-deep/60 border border-ludo-magenta/30 rounded-xl p-6 relative overflow-hidden group">
                 <div className="absolute inset-0 bg-gradient-to-br from-ludo-magenta/5 to-transparent" />
                 <div className="relative z-10">
@@ -68,21 +68,22 @@ export const CTA: React.FC<CTAProps> = ({ onOpenBeta }) => {
                     <span className="font-mono text-xs text-ludo-magenta uppercase tracking-widest">Total Visitors</span>
                   </div>
                   <a 
-                    href="https://librecounter.org/ludobotics.com/show" 
+                    href="https://88x31.lol" 
                     target="_blank"
                     rel="noopener noreferrer"
                     className="block"
                   >
                     <img 
-                      src="https://librecounter.org/counter.svg" 
-                      referrerPolicy="no-referrer"
+                      src="https://88x31.lol/counter.gif?color=magenta" 
                       alt="Total Visitors"
+                      width="150"
+                      className="mx-auto"
                     />
                   </a>
                 </div>
               </div>
 
-              {/* Today's Visits */}
+              {/* Today's Visits - Another counter */}
               <div className="bg-ludo-deep/60 border border-ludo-orange/30 rounded-xl p-6 relative overflow-hidden group">
                 <div className="absolute inset-0 bg-gradient-to-br from-ludo-orange/5 to-transparent" />
                 <div className="relative z-10">
@@ -90,15 +91,16 @@ export const CTA: React.FC<CTAProps> = ({ onOpenBeta }) => {
                     <span className="font-mono text-xs text-ludo-orange uppercase tracking-widest">Today's Visits</span>
                   </div>
                   <a 
-                    href="https://librecounter.org/ludobotics.com/show" 
+                    href="https://88x31.lol" 
                     target="_blank"
                     rel="noopener noreferrer"
                     className="block"
                   >
                     <img 
-                      src="https://librecounter.org/counter.svg" 
-                      referrerPolicy="no-referrer"
+                      src="https://88x31.lol/counter.gif?color=orange" 
                       alt="Today's Visits"
+                      width="150"
+                      className="mx-auto"
                     />
                   </a>
                 </div>
