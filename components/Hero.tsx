@@ -103,7 +103,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenBeta }) => {
       <VideoModal
         isOpen={isVideoOpen}
         onClose={() => setIsVideoOpen(false)}
-        videoUrl="https://drive.google.com/file/d/1Du9RhQXgU3nc-LIXLEoZRvKDWP5A4j4j/preview"
+        videoUrl="https://www.youtube.com/embed/DOboWd8L6Nw"
       />
     </Section >
   );
