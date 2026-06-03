@@ -11,17 +11,23 @@ import { Footer } from './components/Footer';
 import { BetaModal } from './components/BetaModal';
 import { CarouselModal } from './components/CarouselModal';
 import { TRDPage } from './components/TRDPage';
+import { LauncherDownloadStudent } from './components/LauncherDownloadStudent';
 
 function App() {
   const [isBetaModalOpen, setIsBetaModalOpen] = useState(false);
   const [isSneakPeekOpen, setIsSneakPeekOpen] = useState(false);
   const [view, setView] = useState<'landing' | 'trd'>('landing');
+  const path = window.location.pathname.replace(/\/$/, '');
 
   const openBeta = () => setIsBetaModalOpen(true);
   const closeBeta = () => setIsBetaModalOpen(false);
 
   const openSneakPeek = () => setIsSneakPeekOpen(true);
   const closeSneakPeek = () => setIsSneakPeekOpen(false);
+
+  if (path === '/launcher_download_student') {
+    return <LauncherDownloadStudent />;
+  }
 
   if (view === 'trd') {
     return <TRDPage onBack={() => setView('landing')} />;
