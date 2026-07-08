@@ -12,8 +12,13 @@ import { BetaModal } from './components/BetaModal';
 import { CarouselModal } from './components/CarouselModal';
 import { TRDPage } from './components/TRDPage';
 import { LauncherDownloadStudent } from './components/LauncherDownloadStudent';
+import { AccountPage, isAccountPath, isOrganizationPath } from './components/AccountPage';
 
-function App() {
+interface AppProps {
+  isClerkConfigured: boolean;
+}
+
+function App({ isClerkConfigured }: AppProps) {
   const [isBetaModalOpen, setIsBetaModalOpen] = useState(false);
   const [isSneakPeekOpen, setIsSneakPeekOpen] = useState(false);
   const [view, setView] = useState<'landing' | 'trd'>('landing');
@@ -27,6 +32,10 @@ function App() {
 
   if (path === '/launcher_download_student') {
     return <LauncherDownloadStudent />;
+  }
+
+  if (isAccountPath(path) || isOrganizationPath(path)) {
+    return <AccountPage path={path} isClerkConfigured={isClerkConfigured} />;
   }
 
   if (view === 'trd') {
