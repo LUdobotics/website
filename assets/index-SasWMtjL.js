@@ -390,6 +390,7 @@ ${i}`))},G0=(n,i,r,a,o)=>{const{notify:d}=o||{};let h=n.get(r);h||(h=[],n.set(r,
       background: #ffffff !important;
       color: #020810 !important;
       caret-color: #020810 !important;
+      direction: ltr !important;
       text-align: center !important;
       font-size: 1.15rem !important;
       line-height: 3rem !important;
@@ -397,6 +398,15 @@ ${i}`))},G0=(n,i,r,a,o)=>{const{notify:d}=o||{};let h=n.get(r);h||(h=[],n.set(r,
       letter-spacing: 0 !important;
       text-shadow: none !important;
       -webkit-text-fill-color: #020810 !important;
+    }
+
+    .clerk-account-surface .cl-formField:has(.cl-otpCodeField),
+    .clerk-account-surface .cl-formField:has(.cl-verificationCodeField),
+    .clerk-account-surface .cl-formFieldRow:has(.cl-otpCodeField),
+    .clerk-account-surface .cl-formFieldRow:has(.cl-verificationCodeField) {
+      align-items: center !important;
+      justify-content: center !important;
+      text-align: center !important;
     }
 
     .clerk-account-surface .cl-otpCodeField,
@@ -417,9 +427,12 @@ ${i}`))},G0=(n,i,r,a,o)=>{const{notify:d}=o||{};let h=n.get(r);h||(h=[],n.set(r,
       gap: 0.5rem !important;
       width: auto !important;
       max-width: 100% !important;
-      margin-left: auto !important;
-      margin-right: auto !important;
+      margin-left: 0 !important;
+      margin-right: 0 !important;
       overflow: visible !important;
+      position: relative !important;
+      left: 50% !important;
+      transform: translateX(-50%) !important;
     }
 
     .clerk-account-surface .cl-otpCodeFieldInputContainer,
@@ -428,6 +441,14 @@ ${i}`))},G0=(n,i,r,a,o)=>{const{notify:d}=o||{};let h=n.get(r);h||(h=[],n.set(r,
       min-width: 2.5rem !important;
       height: 3rem !important;
       flex: 0 0 2.5rem !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+    }
+
+    .clerk-account-surface .cl-otpCodeFieldInputContainer *,
+    .clerk-account-surface .cl-verificationCodeFieldInputContainer * {
+      text-align: center !important;
     }
 
     @media (min-width: 480px) {
