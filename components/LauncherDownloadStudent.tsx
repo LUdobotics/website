@@ -105,7 +105,7 @@ export const LauncherDownloadStudent: React.FC = () => {
                     If double-clicking does not start the launcher, make the file executable first. From a terminal in the download folder, run:
                   </p>
                   <div className="bg-ludo-deep/70 border border-ludo-border/30 rounded-lg px-4 py-3 font-mono text-sm text-ludo-cyan overflow-x-auto">
-                    chmod +x ./Ludobotics*.AppImage
+                    chmod +x ./Launcher.AppImage
                   </div>
                 </div>
 

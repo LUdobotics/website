@@ -33,6 +33,7 @@ Direct URLs:
 - `/account/sign-in` - sign in to an existing account
 - `/account/manage` - manage the signed-in user's account and organization access
 - `/organization/manage` - legacy compatibility URL that redirects to `/account/manage`
+- `/launcher_download_client` - launcher client download page
 
 Teacher workflow:
 
@@ -45,8 +46,9 @@ Student workflow:
 
 1. Student does not use open/public account creation.
 2. Teacher sends an organization invitation from `/account/manage`.
-3. Student accepts the invitation and signs up/signs in.
+3. Student accepts the invitation through `/account/student/invitation`.
 4. Clerk adds the student to the inviting organization as part of the invitation acceptance flow.
+5. After sign-up or sign-in, the student is redirected to `/launcher_download_client`.
 
 Required local environment variable:
 
@@ -65,6 +67,9 @@ For production, set the same variable in the environment used to build the stati
 5. If you use social login, enable the provider under **User & Authentication > Social Connections** and configure its OAuth credentials.
 6. Enable **Organizations** in the Clerk Dashboard.
 7. Configure organization roles. This site expects teachers to use `org:admin_teacher` and students to use `org:student`.
+   - The teacher role must be a real Clerk organization role, not user metadata.
+   - The organization creator/default teacher role in Clerk should be `org:admin_teacher`.
+   - Student invitations should assign `org:student`.
 8. In **Configure > Domains**, make sure your production domain is configured for the production Clerk instance:
    `ludobotics.com`
 9. In **Configure > Paths** or redirect URL settings, use these app paths:
@@ -76,9 +81,13 @@ For production, set the same variable in the environment used to build the stati
    - Create organization URL: `/organization/create`
    - Organization profile URL: `/account/manage`
 
-For student invitations, use Clerk's organization invitation flow from `/account/manage`. Clerk's organization invitations add accepted students to the organization automatically. If you later need a custom invitation email redirect URL, point it to:
+For student invitations, use Clerk's organization invitation flow from `/account/manage`. Clerk's organization invitations add accepted students to the organization automatically. Set the organization invitation redirect URL to:
 
 `https://ludobotics.com/account/student/invitation`
+
+The student invitation and student sign-in pages force the final redirect to:
+
+`https://ludobotics.com/launcher_download_client`
 
 Use a `pk_test_...` key for local development and a `pk_live_...` key for production.
 
@@ -105,7 +114,7 @@ After deployment, wait a minute or two, then test:
 
 ## Hidden SPA Routes
 
-The `/launcher_download_student`, `/account/*`, and `/organization/*` pages are React routes, not physical folders in the repository. GitHub Pages needs a `404.html` fallback so direct links can load the app and let React render the correct page.
+The `/launcher_download_student`, `/launcher_download_client`, `/account/*`, and `/organization/*` pages are React routes, not physical folders in the repository. GitHub Pages needs a `404.html` fallback so direct links can load the app and let React render the correct page.
 
 The build script creates both:
 

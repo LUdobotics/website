@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import {
   CreateOrganization,
   OrganizationList,
@@ -6,6 +6,7 @@ import {
   OrganizationSwitcher,
   RedirectToSignIn,
   SignIn,
+  SignOutButton,
   SignUp,
   UserProfile,
   useOrganization,
@@ -18,6 +19,8 @@ interface AccountPageProps {
   path: string;
   isClerkConfigured: boolean;
 }
+
+const launcherDownloadPath = '/launcher_download_client';
 
 export const isAccountPath = (path: string) => path === '/account' || path.startsWith('/account/');
 export const isOrganizationPath = (path: string) => path === '/organization' || path.startsWith('/organization/');
@@ -44,10 +47,6 @@ const clerkAppearance = {
     footerActionText: 'text-white/70',
     footerActionLink: 'text-ludo-cyan',
     formFieldErrorText: 'text-ludo-orange',
-    otpCodeField: 'w-full',
-    otpCodeFieldInputs: 'flex justify-center gap-3',
-    otpCodeFieldInputContainer: 'w-12 h-14',
-    otpCodeFieldInput: 'w-12 h-14 text-center text-xl font-bold',
   },
 };
 
@@ -129,7 +128,10 @@ const ClerkAccountSurface: React.FC<{ path: string }> = ({ path }) => {
         routing="path"
         path={isStudentSignIn ? '/account/student/sign-in' : '/account/sign-in'}
         signUpUrl={isStudentSignIn ? '/account/student/invitation' : '/account/teacher/sign-up'}
-        fallbackRedirectUrl="/account/manage"
+        forceRedirectUrl={isStudentSignIn ? launcherDownloadPath : undefined}
+        fallbackRedirectUrl={isStudentSignIn ? launcherDownloadPath : '/account/manage'}
+        signUpForceRedirectUrl={isStudentSignIn ? launcherDownloadPath : undefined}
+        signUpFallbackRedirectUrl={isStudentSignIn ? launcherDownloadPath : undefined}
         appearance={clerkAppearance}
       />
     );
@@ -157,7 +159,10 @@ const ClerkAccountSurface: React.FC<{ path: string }> = ({ path }) => {
         routing="path"
         path="/account/student/invitation"
         signInUrl="/account/student/sign-in"
-        fallbackRedirectUrl="/account/manage"
+        forceRedirectUrl={launcherDownloadPath}
+        fallbackRedirectUrl={launcherDownloadPath}
+        signInForceRedirectUrl={launcherDownloadPath}
+        signInFallbackRedirectUrl={launcherDownloadPath}
         appearance={clerkAppearance}
       />
     );
@@ -169,7 +174,6 @@ const ClerkAccountSurface: React.FC<{ path: string }> = ({ path }) => {
       path={path.startsWith('/account/teacher/sign-up') ? '/account/teacher/sign-up' : '/account/sign-up'}
       signInUrl="/account/sign-in"
       fallbackRedirectUrl="/organization/create"
-      unsafeMetadata={{ role: 'teacher' }}
       appearance={clerkAppearance}
     />
   );
@@ -198,28 +202,9 @@ const AccountWorkflowLinks: React.FC = () => (
 );
 
 const AccountManagement: React.FC = () => {
-  const { isLoaded, isSignedIn, user } = useUser();
+  const { isLoaded, isSignedIn } = useUser();
   const { isLoaded: isOrganizationLoaded, organization, membership } = useOrganization();
-  const [roleRepairStatus, setRoleRepairStatus] = useState<'idle' | 'loading' | 'failed'>('idle');
-
-  const isTeacherSignup = user?.unsafeMetadata?.role === 'teacher';
-  const isTeacher = isTeacherMembershipRole(membership?.role) || isTeacherSignup;
-
-  useEffect(() => {
-    if (!isTeacherSignup || !membership || isTeacherMembershipRole(membership.role) || roleRepairStatus !== 'idle') {
-      return;
-    }
-
-    setRoleRepairStatus('loading');
-    membership
-      .update({ role: 'org:admin_teacher' })
-      .then(() => {
-        window.location.reload();
-      })
-      .catch(() => {
-        setRoleRepairStatus('failed');
-      });
-  }, [isTeacherSignup, membership, roleRepairStatus]);
+  const isTeacher = isTeacherMembershipRole(membership?.role);
 
   if (!isLoaded || !isOrganizationLoaded) {
     return <AccountLoading label="Loading account" />;
@@ -235,15 +220,18 @@ const AccountManagement: React.FC = () => {
         <UserProfile routing="hash" appearance={clerkAppearance} />
       </ManagementPanel>
 
+      <SignOutPanel />
+
+      <LauncherDownloadPanel />
+
       {organization ? (
         isTeacher ? (
           <TeacherOrganizationSection
             organizationName={organization.name}
             role={membership?.role}
-            roleRepairStatus={roleRepairStatus}
           />
         ) : (
-          <StudentOrganizationSummary organizationName={organization.name} role={membership?.role} />
+          <OrganizationMemberSummary organizationName={organization.name} role={membership?.role} />
         )
       ) : (
         <ManagementPanel eyebrow="Organization" title="No active organization">
@@ -292,8 +280,7 @@ const ProtectedOrganizationManage: React.FC = () => {
 const TeacherOrganizationSection: React.FC<{
   organizationName: string;
   role?: string | null;
-  roleRepairStatus: 'idle' | 'loading' | 'failed';
-}> = ({ organizationName, role, roleRepairStatus }) => (
+}> = ({ organizationName, role }) => (
   <div className="w-full space-y-5">
       <div className="bg-ludo-panel border border-ludo-cyan/30 rounded-xl p-5">
         <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
@@ -301,13 +288,8 @@ const TeacherOrganizationSection: React.FC<{
             <span className="font-mono text-xs text-ludo-cyan uppercase tracking-widest">Active organization</span>
             <h2 className="font-orbitron text-2xl text-white font-bold mt-2">{organizationName}</h2>
             <p className="font-grotesk text-white/75 text-sm mt-1">Teacher access: organization settings, members, roles, and student invitations.</p>
-            {roleRepairStatus === 'loading' && (
-              <p className="font-mono text-xs text-ludo-cyan mt-3 uppercase tracking-widest">Updating teacher role...</p>
-            )}
-            {roleRepairStatus === 'failed' && (
-              <p className="font-grotesk text-ludo-orange text-sm mt-3">
-                Your account was created through teacher onboarding, but Clerk still assigned this membership as {formatMembershipRole(role ?? 'unknown')}. In Clerk, set the organization creator/default teacher role to Admin - Teacher, then update this member to Admin - Teacher.
-              </p>
+            {role && (
+              <p className="font-mono text-xs text-white/75 mt-3 uppercase tracking-widest">Role: {formatMembershipRole(role)}</p>
             )}
           </div>
           <div className="flex justify-start md:justify-end">
@@ -342,20 +324,68 @@ const ManagementPanel: React.FC<{ eyebrow: string; title: string; children: Reac
   </section>
 );
 
-const StudentOrganizationSummary: React.FC<{ organizationName: string; role?: string | null }> = ({ organizationName, role }) => (
+const SignOutPanel: React.FC = () => (
+  <section className="bg-ludo-panel border border-ludo-border/40 rounded-xl p-5">
+    <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+      <div>
+        <span className="font-mono text-xs text-ludo-cyan uppercase tracking-widest">Session</span>
+        <h2 className="font-orbitron text-2xl text-white font-bold mt-2">Disconnect account</h2>
+        <p className="font-grotesk text-white/75 text-sm mt-1">
+          Sign out of this browser and return to the account sign-in page.
+        </p>
+      </div>
+      <SignOutButton redirectUrl="/account/sign-in">
+        <button
+          type="button"
+          className="inline-flex items-center justify-center border border-ludo-orange/70 text-ludo-orange px-5 py-3 font-orbitron text-sm uppercase tracking-widest hover:bg-ludo-orange hover:text-ludo-deep transition-colors"
+        >
+          Disconnect
+        </button>
+      </SignOutButton>
+    </div>
+  </section>
+);
+
+const LauncherDownloadPanel: React.FC = () => (
+  <section className="bg-ludo-panel border border-ludo-cyan/30 rounded-xl p-5">
+    <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+      <div>
+        <span className="font-mono text-xs text-ludo-cyan uppercase tracking-widest">Launcher</span>
+        <h2 className="font-orbitron text-2xl text-white font-bold mt-2">Download the client</h2>
+        <p className="font-grotesk text-white/75 text-sm mt-1">
+          Open the launcher download page after your account or invitation is ready.
+        </p>
+      </div>
+      <a
+        href={launcherDownloadPath}
+        className="inline-flex items-center justify-center border border-ludo-cyan bg-ludo-cyan text-ludo-deep px-5 py-3 font-orbitron text-sm uppercase tracking-widest hover:bg-transparent hover:text-ludo-cyan transition-colors"
+      >
+        Download client
+      </a>
+    </div>
+  </section>
+);
+
+const OrganizationMemberSummary: React.FC<{ organizationName: string; role?: string | null }> = ({ organizationName, role }) => {
+  const isStudent = role === 'org:student' || role === 'student';
+
+  return (
   <div className="w-full bg-ludo-panel border border-ludo-cyan/30 rounded-xl p-8">
     <span className="font-mono text-xs text-ludo-cyan uppercase tracking-widest">Your organization</span>
     <h2 className="font-orbitron text-3xl text-white font-bold mt-3">{organizationName}</h2>
     <p className="font-grotesk text-white/75 leading-relaxed mt-4">
-      You are signed in as a student member of this organization. Organization settings and invitations are managed by your teacher.
+      {isStudent
+        ? 'You are signed in as a student member of this organization. Organization settings and invitations are managed by your teacher.'
+        : 'You are signed in to this organization, but this membership is not using the teacher role. Organization management requires org:admin_teacher.'}
     </p>
     {role && (
       <div className="mt-6 inline-flex border border-ludo-border/50 rounded-lg px-3 py-2 font-mono text-xs text-white/80">
-        Role: {formatMembershipRole(role)}
+        Role: {formatMembershipRole(role)} ({role})
       </div>
     )}
   </div>
-);
+  );
+};
 
 const ProtectedOrganizationList: React.FC = () => {
   const { isLoaded, isSignedIn } = useUser();
@@ -418,60 +448,29 @@ const ClerkTextOverrides: React.FC = () => (
       color: rgba(255, 255, 255, 0.88) !important;
     }
 
-    .clerk-account-surface input,
-    .clerk-account-surface input::placeholder {
+    .clerk-account-surface input:not([autocomplete="one-time-code"]):not([inputmode="numeric"]),
+    .clerk-account-surface input:not([autocomplete="one-time-code"]):not([inputmode="numeric"])::placeholder {
       color: #020810 !important;
     }
 
-    .clerk-account-surface input[inputmode="numeric"],
     .clerk-account-surface input[autocomplete="one-time-code"],
-    .clerk-account-surface .cl-otpCodeFieldInput,
-    .clerk-account-surface .cl-verificationCodeFieldInput,
-    .clerk-account-surface .cl-formFieldInput[type="text"][inputmode="numeric"] {
-      width: 3rem !important;
-      min-width: 3rem !important;
-      max-width: 3rem !important;
-      height: 3.5rem !important;
-      min-height: 3.5rem !important;
-      padding: 0 !important;
-      background: #ffffff !important;
-      color: #020810 !important;
-      caret-color: #020810 !important;
+    .clerk-account-surface input[inputmode="numeric"] {
+      color: transparent !important;
+      caret-color: transparent !important;
       text-align: center !important;
-      font-size: 1.25rem !important;
-      line-height: 3.5rem !important;
-      font-weight: 800 !important;
+      font-weight: 700 !important;
       letter-spacing: 0 !important;
       text-shadow: none !important;
-      -webkit-text-fill-color: #020810 !important;
+      -webkit-text-fill-color: transparent !important;
     }
 
-    .clerk-account-surface .cl-otpCodeField,
-    .clerk-account-surface .cl-verificationCodeField {
-      width: 100% !important;
-    }
-
-    .clerk-account-surface .cl-otpCodeFieldInputs,
-    .clerk-account-surface .cl-verificationCodeFieldInputs {
-      display: flex !important;
-      flex-wrap: nowrap !important;
-      justify-content: center !important;
-      gap: 0.75rem !important;
-      width: 100% !important;
-    }
-
-    .clerk-account-surface .cl-otpCodeFieldInputContainer,
-    .clerk-account-surface .cl-verificationCodeFieldInputContainer {
-      width: 3rem !important;
-      min-width: 3rem !important;
-      height: 3.5rem !important;
-      flex: 0 0 3rem !important;
-    }
-
-    .clerk-account-surface .cl-otpCodeFieldInput::placeholder,
-    .clerk-account-surface .cl-verificationCodeFieldInput::placeholder {
-      color: rgba(2, 8, 16, 0.45) !important;
-      -webkit-text-fill-color: rgba(2, 8, 16, 0.45) !important;
+    .clerk-account-surface .cl-otpCodeFieldInput,
+    .clerk-account-surface .cl-verificationCodeFieldInput {
+      color: #ffffff !important;
+      caret-color: transparent !important;
+      -webkit-text-fill-color: #ffffff !important;
+      text-align: center !important;
+      text-shadow: none !important;
     }
 
     .clerk-account-surface .cl-headerTitle,
@@ -569,15 +568,15 @@ const isTeacherMembershipRole = (role?: string | null) => {
     return false;
   }
 
-  return ['admin', 'org:admin', 'teacher', 'org:teacher', 'admin_teacher', 'org:admin_teacher'].includes(role);
+  return role === 'org:admin_teacher' || role === 'admin_teacher';
 };
 
 const formatMembershipRole = (role: string) => {
-  if (role === 'org:admin' || role === 'admin' || role === 'org:admin_teacher' || role === 'admin_teacher') {
+  if (role === 'org:admin_teacher' || role === 'admin_teacher') {
     return 'Teacher';
   }
 
-  if (role === 'org:member' || role === 'member' || role === 'org:student' || role === 'student') {
+  if (role === 'org:student' || role === 'student') {
     return 'Student';
   }
 
