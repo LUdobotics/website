@@ -381,7 +381,7 @@ ${i}`))},G0=(n,i,r,a,o)=>{const{notify:d}=o||{};let h=n.get(r);h||(h=[],n.set(r,
     .clerk-account-surface input[autocomplete="one-time-code"],
     .clerk-account-surface input[inputmode="numeric"] {
       color: transparent !important;
-      caret-color: #00ffff !important;
+      caret-color: transparent !important;
       text-align: center !important;
       font-weight: 700 !important;
       letter-spacing: 0 !important;
