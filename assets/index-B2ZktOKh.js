@@ -381,9 +381,9 @@ ${i}`))},G0=(n,i,r,a,o)=>{const{notify:d}=o||{};let h=n.get(r);h||(h=[],n.set(r,
     .clerk-account-surface .cl-otpCodeFieldInput,
     .clerk-account-surface .cl-verificationCodeFieldInput {
       box-sizing: border-box !important;
-      width: 2.5rem !important;
-      min-width: 2.5rem !important;
-      max-width: 2.5rem !important;
+      width: 2.25rem !important;
+      min-width: 2.25rem !important;
+      max-width: 2.25rem !important;
       height: 3rem !important;
       min-height: 3rem !important;
       padding: 0 !important;
@@ -420,27 +420,27 @@ ${i}`))},G0=(n,i,r,a,o)=>{const{notify:d}=o||{};let h=n.get(r);h||(h=[],n.set(r,
 
     .clerk-account-surface .cl-otpCodeFieldInputs,
     .clerk-account-surface .cl-verificationCodeFieldInputs {
-      display: flex !important;
-      flex-wrap: nowrap !important;
+      display: grid !important;
+      grid-template-columns: repeat(6, 2.25rem) !important;
       justify-content: center !important;
       align-items: center !important;
-      gap: 0.5rem !important;
-      width: auto !important;
+      gap: 0.4rem !important;
+      width: 100% !important;
       max-width: 100% !important;
-      margin-left: 0 !important;
-      margin-right: 0 !important;
+      margin-left: auto !important;
+      margin-right: auto !important;
       overflow: visible !important;
-      position: relative !important;
-      left: 50% !important;
-      transform: translateX(-50%) !important;
+      position: static !important;
+      left: auto !important;
+      transform: none !important;
     }
 
     .clerk-account-surface .cl-otpCodeFieldInputContainer,
     .clerk-account-surface .cl-verificationCodeFieldInputContainer {
-      width: 2.5rem !important;
-      min-width: 2.5rem !important;
+      width: 2.25rem !important;
+      min-width: 2.25rem !important;
       height: 3rem !important;
-      flex: 0 0 2.5rem !important;
+      flex: 0 0 2.25rem !important;
       display: flex !important;
       align-items: center !important;
       justify-content: center !important;
@@ -465,7 +465,8 @@ ${i}`))},G0=(n,i,r,a,o)=>{const{notify:d}=o||{};let h=n.get(r);h||(h=[],n.set(r,
 
       .clerk-account-surface .cl-otpCodeFieldInputs,
       .clerk-account-surface .cl-verificationCodeFieldInputs {
-        gap: 0.55rem !important;
+        grid-template-columns: repeat(6, 2.75rem) !important;
+        gap: 0.5rem !important;
       }
 
       .clerk-account-surface .cl-otpCodeFieldInputContainer,
