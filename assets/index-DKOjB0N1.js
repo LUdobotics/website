@@ -373,9 +373,28 @@ ${i}`))},G0=(n,i,r,a,o)=>{const{notify:d}=o||{};let h=n.get(r);h||(h=[],n.set(r,
       color: rgba(255, 255, 255, 0.88) !important;
     }
 
-    .clerk-account-surface input,
-    .clerk-account-surface input::placeholder {
+    .clerk-account-surface input:not([autocomplete="one-time-code"]):not([inputmode="numeric"]),
+    .clerk-account-surface input:not([autocomplete="one-time-code"]):not([inputmode="numeric"])::placeholder {
       color: #020810 !important;
+    }
+
+    .clerk-account-surface input[autocomplete="one-time-code"],
+    .clerk-account-surface input[inputmode="numeric"] {
+      color: #ffffff !important;
+      caret-color: #00ffff !important;
+      text-align: center !important;
+      font-weight: 700 !important;
+      letter-spacing: 0 !important;
+      text-shadow: none !important;
+      -webkit-text-fill-color: #ffffff !important;
+    }
+
+    .clerk-account-surface .cl-otpCodeFieldInput,
+    .clerk-account-surface .cl-verificationCodeFieldInput {
+      color: #ffffff !important;
+      -webkit-text-fill-color: #ffffff !important;
+      text-align: center !important;
+      text-shadow: none !important;
     }
 
     .clerk-account-surface .cl-headerTitle,
