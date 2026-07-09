@@ -380,13 +380,13 @@ ${i}`))},G0=(n,i,r,a,o)=>{const{notify:d}=o||{};let h=n.get(r);h||(h=[],n.set(r,
 
     .clerk-account-surface input[autocomplete="one-time-code"],
     .clerk-account-surface input[inputmode="numeric"] {
-      color: #ffffff !important;
+      color: transparent !important;
       caret-color: #00ffff !important;
       text-align: center !important;
       font-weight: 700 !important;
       letter-spacing: 0 !important;
       text-shadow: none !important;
-      -webkit-text-fill-color: #ffffff !important;
+      -webkit-text-fill-color: transparent !important;
     }
 
     .clerk-account-surface .cl-otpCodeFieldInput,
