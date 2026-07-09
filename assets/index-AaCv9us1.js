@@ -392,6 +392,7 @@ ${i}`))},G0=(n,i,r,a,o)=>{const{notify:d}=o||{};let h=n.get(r);h||(h=[],n.set(r,
     .clerk-account-surface .cl-otpCodeFieldInput,
     .clerk-account-surface .cl-verificationCodeFieldInput {
       color: #ffffff !important;
+      caret-color: transparent !important;
       -webkit-text-fill-color: #ffffff !important;
       text-align: center !important;
       text-shadow: none !important;
