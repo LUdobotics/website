@@ -256,10 +256,18 @@ const useOdysseyProfileSync = ({
       setIsSyncing(true);
 
       try {
-        await syncOdysseyProfile({ getToken, user });
+        // Clerk's editor owns and awaits setProfileImage. Once useUser reports
+        // the change, reload to discard any preview/stale resource and prefer
+        // the final UserResource returned by Clerk.
+        const refreshedUser = await user.reload();
         if (cancelled) return;
 
-        lastSyncedSignature.current = profileSignature;
+        await syncOdysseyProfile({ getToken, user: refreshedUser });
+        if (cancelled) return;
+
+        const refreshedSignature = getOdysseyProfileSignature(refreshedUser);
+        lastSyncedSignature.current = refreshedSignature;
+        attemptedSignature.current = refreshedSignature;
         retryAttempt.current = 0;
         setWarning('');
       } catch (syncError) {
