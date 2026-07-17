@@ -59,7 +59,9 @@ VITE_CLERK_PUBLISHABLE_KEY=pk_test_your_publishable_key
 VITE_ODYSSEY_BACKEND_URL=http://127.0.0.1:8000
 ```
 
-`VITE_ODYSSEY_BACKEND_URL` must point to the same Odyssey backend used by the launcher. The teacher dashboard sends the active Clerk session token to `/organisations/current/teacher-dashboard` and refreshes its snapshot every 15 seconds.
+`VITE_ODYSSEY_BACKEND_URL` must point to the same Odyssey backend used by the launcher. The teacher dashboard sends the active Clerk session token to `/organisations/current/teacher-dashboard` and refreshes its snapshot every 15 seconds. The account manager also reconciles Clerk names and profile pictures through `/me/profile` when the page loads and whenever Clerk exposes an updated profile.
+
+The backend CORS configuration must permit the deployed website origin to send `POST` requests with the `Authorization` and `Content-Type` headers. Synchronization resolves the user exclusively from the Clerk session token, never from an email address.
 
 
 

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   CreateOrganization,
   OrganizationList,
@@ -9,12 +9,18 @@ import {
   SignOutButton,
   SignUp,
   UserProfile,
+  useAuth,
   useOrganization,
   useUser,
 } from '@clerk/react';
-import { ArrowLeft } from 'lucide-react';
+import { AlertTriangle, ArrowLeft, RefreshCw } from 'lucide-react';
 import { Section } from './ui/Section';
 import { TeacherDashboardPage } from './TeacherDashboardPage';
+import {
+  getOdysseyProfileSignature,
+  OdysseyProfileUser,
+  syncOdysseyProfile,
+} from './odysseyProfile';
 
 interface AccountPageProps {
   path: string;
@@ -212,11 +218,88 @@ const AccountWorkflowLinks: React.FC = () => (
 
 type AccountManagementTab = 'overview' | 'profile' | 'organization';
 
+const profileRetryDelays = [5_000, 15_000, 30_000];
+
+const useOdysseyProfileSync = ({
+  enabled,
+  getToken,
+  user,
+}: {
+  enabled: boolean;
+  getToken: () => Promise<string | null>;
+  user: OdysseyProfileUser | null | undefined;
+}) => {
+  const [warning, setWarning] = useState('');
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [retryKey, setRetryKey] = useState(0);
+  const lastSyncedSignature = useRef('');
+  const attemptedSignature = useRef('');
+  const retryAttempt = useRef(0);
+  const retryTimer = useRef<number | null>(null);
+  const profileSignature = user ? getOdysseyProfileSignature(user) : '';
+
+  useEffect(() => {
+    if (!enabled || !user || !profileSignature) return;
+    if (lastSyncedSignature.current === profileSignature) return;
+
+    if (attemptedSignature.current !== profileSignature) {
+      attemptedSignature.current = profileSignature;
+      retryAttempt.current = 0;
+      if (retryTimer.current !== null) window.clearTimeout(retryTimer.current);
+    }
+
+    let cancelled = false;
+
+    // Clerk's embedded profile editor has no save callback. Waiting briefly
+    // here means this effect runs only after useUser exposes the new resource.
+    const syncTimer = window.setTimeout(async () => {
+      setIsSyncing(true);
+
+      try {
+        await syncOdysseyProfile({ getToken, user });
+        if (cancelled) return;
+
+        lastSyncedSignature.current = profileSignature;
+        retryAttempt.current = 0;
+        setWarning('');
+      } catch (syncError) {
+        if (cancelled) return;
+
+        setWarning(syncError instanceof Error ? syncError.message : 'Profile synchronization failed.');
+        const delay = profileRetryDelays[Math.min(retryAttempt.current, profileRetryDelays.length - 1)];
+        retryAttempt.current += 1;
+        retryTimer.current = window.setTimeout(() => setRetryKey(value => value + 1), delay);
+      } finally {
+        if (!cancelled) setIsSyncing(false);
+      }
+    }, retryAttempt.current === 0 ? 500 : 0);
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(syncTimer);
+      if (retryTimer.current !== null) window.clearTimeout(retryTimer.current);
+    };
+  }, [enabled, getToken, profileSignature, retryKey]);
+
+  const retry = () => {
+    if (retryTimer.current !== null) window.clearTimeout(retryTimer.current);
+    setRetryKey(value => value + 1);
+  };
+
+  return { isSyncing, retry, warning };
+};
+
 const AccountManagement: React.FC = () => {
   const { isLoaded, isSignedIn, user } = useUser();
+  const { getToken } = useAuth();
   const { isLoaded: isOrganizationLoaded, organization, membership } = useOrganization();
   const [activeTab, setActiveTab] = useState<AccountManagementTab>('overview');
   const isTeacher = isTeacherMembershipRole(membership?.role);
+  const profileSync = useOdysseyProfileSync({
+    enabled: isLoaded && Boolean(isSignedIn && user),
+    getToken,
+    user,
+  });
 
   if (!isLoaded || !isOrganizationLoaded) {
     return <AccountLoading label="Loading account" />;
@@ -235,6 +318,28 @@ const AccountManagement: React.FC = () => {
 
   return (
     <div className="w-full space-y-6">
+      {profileSync.warning && (
+        <div role="alert" className="flex flex-col gap-4 rounded-xl border border-ludo-orange/35 bg-ludo-orange/10 p-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-start gap-3">
+            <AlertTriangle size={18} className="mt-0.5 shrink-0 text-ludo-orange" />
+            <div>
+              <strong className="font-grotesk text-sm text-white">Your Clerk profile is safe.</strong>
+              <p className="mt-1 font-grotesk text-xs leading-relaxed text-white/60">
+                Odyssey has not received the latest profile yet. We will retry automatically; you can also retry now.
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={profileSync.retry}
+            disabled={profileSync.isSyncing}
+            className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg border border-ludo-orange/40 px-4 py-2 font-mono text-[10px] uppercase tracking-widest text-ludo-orange transition-colors hover:bg-ludo-orange/10 disabled:cursor-wait disabled:opacity-60"
+          >
+            <RefreshCw size={14} className={profileSync.isSyncing ? 'animate-spin' : ''} />
+            {profileSync.isSyncing ? 'Retrying' : 'Retry now'}
+          </button>
+        </div>
+      )}
       <section className="overflow-hidden rounded-2xl border border-ludo-cyan/25 bg-[#06101d]/95 shadow-[0_0_50px_rgba(0,255,255,0.08)]">
         <div className="border-b border-white/10 bg-gradient-to-r from-ludo-cyan/[0.08] to-ludo-blue/[0.04] p-6 md:p-8">
           <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">

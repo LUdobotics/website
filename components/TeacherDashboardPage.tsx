@@ -8,8 +8,9 @@ import {
   normalizeTelemetry,
   OdysseyTeacherDashboardResponse,
 } from './teacher-dashboard/dashboardData';
+import { odysseyBackendUrl } from './odysseyProfile';
 
-const backendUrl = String(import.meta.env.VITE_ODYSSEY_BACKEND_URL ?? '').replace(/\/$/, '');
+const backendUrl = odysseyBackendUrl;
 
 const isTeacherRole = (role?: string | null) => (
   role === 'org:admin_teacher' || role === 'admin_teacher' || role === 'org:admin' || role === 'org:teacher'
