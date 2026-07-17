@@ -12,8 +12,10 @@ import { DashboardStudent } from './dashboardData';
 type SelectedStep = { chapter: OdysseyScenarioChapter; step: OdysseyScenarioStep };
 type Position = { x: number; y: number };
 
-const graphWidth = 1120;
-const graphPadding = 72;
+const graphPadding = 96;
+const graphDepthGap = 168;
+const graphLaneGap = 132;
+const graphNodeRadius = 16;
 
 function requirements(step: OdysseyScenarioStep): string[] {
   return step.requires?.allOf?.filter(id => id !== step.id) ?? [];
@@ -54,21 +56,21 @@ function chapterLayout(chapter: OdysseyScenarioChapter) {
     groups.set(depth, [...(groups.get(depth) ?? []), step]);
   });
   const maxBranchCount = Math.max(1, ...Array.from(groups.values(), group => group.length));
-  const height = Math.max(210, maxBranchCount * 96 + 118);
+  const width = Math.max(760, graphPadding * 2 + maxDepth * graphDepthGap);
+  const height = Math.max(260, maxBranchCount * graphLaneGap + 128);
 
   groups.forEach((group, depth) => {
     const x = maxDepth === 0
-      ? graphWidth / 2
-      : graphPadding + (depth / maxDepth) * (graphWidth - graphPadding * 2);
-    const laneGap = Math.min(96, Math.max(58, (height - 116) / group.length));
-    const startY = height / 2 - ((group.length - 1) * laneGap) / 2;
-    group.forEach((step, lane) => positions.set(step.id, { x, y: startY + lane * laneGap }));
+      ? width / 2
+      : graphPadding + depth * graphDepthGap;
+    const startY = height / 2 - ((group.length - 1) * graphLaneGap) / 2;
+    group.forEach((step, lane) => positions.set(step.id, { x, y: startY + lane * graphLaneGap }));
   });
 
   return {
     positions,
     dependencies,
-    width: graphWidth,
+    width,
     height,
   };
 }
@@ -163,7 +165,7 @@ const ChapterGraph: React.FC<{
           const position = layout.positions.get(step.id)!;
           const checkpointStudents = students.filter(student => student.checkpointId === step.id);
           return (
-            <div key={step.id} className="absolute w-32 -translate-x-1/2 -translate-y-1/2 text-center" style={{ left: position.x, top: position.y }}>
+            <div key={step.id} className="absolute w-40 -translate-x-1/2 text-center" style={{ left: position.x, top: position.y - graphNodeRadius }}>
               <button
                 type="button"
                 onClick={() => onSelect(step)}
@@ -171,10 +173,10 @@ const ChapterGraph: React.FC<{
               >
                 {step.puzzleId ?? index + 1}
               </button>
-              <button type="button" onClick={() => onSelect(step)} className="mt-2 line-clamp-2 min-h-7 font-grotesk text-[10px] font-semibold leading-tight text-white/75 transition-colors hover:text-ludo-cyan">
+              <button type="button" onClick={() => onSelect(step)} className="mt-3 flex min-h-9 w-full items-center justify-center rounded-md border border-white/[0.06] bg-[#071422]/95 px-2 py-1.5 font-grotesk text-[10px] font-semibold leading-tight text-white/80 shadow-sm transition-colors hover:border-ludo-cyan/25 hover:text-ludo-cyan">
                 {step.label}
               </button>
-              <p className="truncate font-mono text-[8px] text-white/35">{step.location}</p>
+              <p className="mt-1 truncate px-2 font-mono text-[8px] text-white/40">{step.location}</p>
               <div className="mt-2 flex min-h-6 justify-center -space-x-1.5">
                 {checkpointStudents.slice(0, 4).map(student => (
                   <span key={student.id} title={`${student.name} · ${student.status.replace('_', ' ')}`} className={`flex h-6 w-6 items-center justify-center rounded-full border-2 border-[#071422] font-mono text-[8px] font-bold text-white ${student.helpRequested ? 'bg-ludo-orange' : 'bg-ludo-blue'}`}>
