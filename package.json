@@ -9,7 +9,9 @@
     "build": "vite build && cp dist/index.html dist/404.html",
     "preview": "vite preview",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d dist"
+    "deploy": "gh-pages -d dist",
+    "sync:teacher-dashboard": "node scripts/sync-teacher-dashboard.mjs",
+    "sync:teacher-dashboard:watch": "node scripts/sync-teacher-dashboard.mjs --watch"
   },
   "dependencies": {
     "@clerk/react": "^6.12.0",

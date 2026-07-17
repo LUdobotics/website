@@ -40,6 +40,7 @@ export type DashboardStudent = {
   email: string;
   initials: string;
   chapter: string;
+  checkpointId: string;
   checkpoint: string;
   state: string;
   progress: number;
@@ -74,7 +75,7 @@ export const chapterDetails = [
     id: 'Ch3',
     shortTitle: 'Robot control',
     title: 'Chapter 3 — Launch files and robot control',
-    milestones: ['Launch discovery', 'Teleoperation', 'Sensor topics', 'Validation'],
+    milestones: ['Liftoff', 'First Node', 'Mining Drone', 'Final Boss'],
   },
 ] as const;
 
@@ -124,6 +125,7 @@ export function normalizeTelemetry(student: OdysseyStudentTelemetry): DashboardS
     email: student.user.email ?? student.user.clerk_user_id ?? student.user.id,
     initials: initialsFor(name),
     chapter: student.chapter ?? 'Not started',
+    checkpointId: student.checkpoint ?? 'not_started',
     checkpoint: checkpointLabels[student.checkpoint ?? ''] ?? student.checkpoint ?? 'Not started',
     state: student.state ?? 'No game state yet',
     progress: Math.round(student.progress * 100),
@@ -145,6 +147,7 @@ export function normalizeTelemetry(student: OdysseyStudentTelemetry): DashboardS
 export const demoStudents: DashboardStudent[] = [
   {
     id: 'maya', name: 'Maya Chen', email: 'maya@orbital.edu', initials: 'MC', chapter: 'Ch2',
+    checkpointId: 'c2_s04',
     checkpoint: 'Relay Camera to CCR', state: 'Configuring image_tools node', progress: 68,
     score: 820, maxScore: 1000, hintsUsed: 1, commandsTotal: 54, commandsSuccessful: 49,
     commandAccuracy: 91, commandMistakes: 5, failures: 0, topMistakes: 'topic name',
@@ -152,6 +155,7 @@ export const demoStudents: DashboardStudent[] = [
   },
   {
     id: 'leo', name: 'Leo Martin', email: 'leo@orbital.edu', initials: 'LM', chapter: 'Ch2',
+    checkpointId: 'c2_s03',
     checkpoint: 'Open CCR Door', state: 'Waiting on service response', progress: 52,
     score: 610, maxScore: 1000, hintsUsed: 4, commandsTotal: 47, commandsSuccessful: 32,
     commandAccuracy: 68, commandMistakes: 15, failures: 2, topMistakes: 'service type, namespace',
@@ -159,6 +163,7 @@ export const demoStudents: DashboardStudent[] = [
   },
   {
     id: 'sana', name: 'Sana Diallo', email: 'sana@orbital.edu', initials: 'SD', chapter: 'Ch3',
+    checkpointId: 'c3_s04',
     checkpoint: 'Robot Teleoperation', state: 'Testing velocity commands', progress: 83,
     score: 930, maxScore: 1000, hintsUsed: 0, commandsTotal: 76, commandsSuccessful: 73,
     commandAccuracy: 96, commandMistakes: 3, failures: 0, topMistakes: 'None recorded',
@@ -166,6 +171,7 @@ export const demoStudents: DashboardStudent[] = [
   },
   {
     id: 'noah', name: 'Noah Weber', email: 'noah@orbital.edu', initials: 'NW', chapter: 'Ch1',
+    checkpointId: 'c1_s07',
     checkpoint: 'Battery Room', state: 'Paused at checkpoint', progress: 34,
     score: 390, maxScore: 1000, hintsUsed: 2, commandsTotal: 29, commandsSuccessful: 22,
     commandAccuracy: 76, commandMistakes: 7, failures: 0, topMistakes: 'package path',

@@ -14,6 +14,7 @@ interface TeacherDashboardViewProps {
   simulated?: boolean;
   lastUpdatedLabel?: string;
   compact?: boolean;
+  hideMissionProgress?: boolean;
 }
 
 const statusStyles: Record<StudentStatus, { label: string; className: string; dot: string }> = {
@@ -32,6 +33,7 @@ export const TeacherDashboardView: React.FC<TeacherDashboardViewProps> = ({
   simulated = false,
   lastUpdatedLabel = 'Updated just now',
   compact = false,
+  hideMissionProgress = false,
 }) => {
   const [filter, setFilter] = useState<StudentFilter>('all');
   const [selectedChapter, setSelectedChapter] = useState('Ch2');
@@ -93,7 +95,7 @@ export const TeacherDashboardView: React.FC<TeacherDashboardViewProps> = ({
           ))}
         </div>
 
-        <div className="mt-4 rounded-xl border border-white/10 bg-ludo-deep/60 p-4">
+        {!hideMissionProgress && <div className="mt-4 rounded-xl border border-white/10 bg-ludo-deep/60 p-4">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-2 font-orbitron text-xs font-bold text-white">
               <Activity size={15} className="text-ludo-magenta" />
@@ -144,7 +146,7 @@ export const TeacherDashboardView: React.FC<TeacherDashboardViewProps> = ({
               );
             })}
           </div>
-        </div>
+        </div>}
 
         <div className="mt-4 overflow-hidden rounded-xl border border-white/10">
           <div className="flex flex-col gap-3 border-b border-white/10 bg-white/[0.025] px-4 py-3 sm:flex-row sm:items-center sm:justify-between">

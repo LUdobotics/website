@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { RedirectToSignIn, useAuth, useOrganization } from '@clerk/react';
 import { AlertTriangle, ArrowLeft, Building2, RefreshCw, ServerOff } from 'lucide-react';
 import { TeacherDashboardView } from './teacher-dashboard/TeacherDashboardView';
+import { FullScenarioMap } from './teacher-dashboard/FullScenarioMap';
 import {
   DashboardStudent,
   normalizeTelemetry,
@@ -130,10 +131,13 @@ export const TeacherDashboardPage: React.FC = () => {
         </div>
       )}
 
+      <FullScenarioMap students={students} />
+
       <TeacherDashboardView
         students={students}
         organizationName={organization.name}
         lastUpdatedLabel={lastUpdated ? `Updated ${lastUpdated.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` : 'Waiting for first snapshot'}
+        hideMissionProgress
       />
 
       {!error && students.length === 0 && (

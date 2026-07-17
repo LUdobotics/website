@@ -120,7 +120,7 @@ export const TeacherBenefits: React.FC = () => {
               <h3 className="mt-2 font-orbitron text-xl font-bold text-white">A classroom in motion</h3>
             </div>
             <p className="max-w-md font-grotesk text-xs leading-relaxed text-white/45 sm:text-right">
-              This preview uses simulated students. The authenticated teacher page connects to real Odyssey telemetry.
+              This preview uses simulated students. The authenticated teacher dashboard connects to real Odyssey telemetry.
             </p>
           </div>
           <TeacherDashboardView students={students} simulated lastUpdatedLabel={updateLabel} compact />

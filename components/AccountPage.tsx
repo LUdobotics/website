@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   CreateOrganization,
   OrganizationList,
@@ -208,9 +208,12 @@ const AccountWorkflowLinks: React.FC = () => (
   </div>
 );
 
+type AccountManagementTab = 'overview' | 'profile' | 'organization';
+
 const AccountManagement: React.FC = () => {
-  const { isLoaded, isSignedIn } = useUser();
+  const { isLoaded, isSignedIn, user } = useUser();
   const { isLoaded: isOrganizationLoaded, organization, membership } = useOrganization();
+  const [activeTab, setActiveTab] = useState<AccountManagementTab>('overview');
   const isTeacher = isTeacherMembershipRole(membership?.role);
 
   if (!isLoaded || !isOrganizationLoaded) {
@@ -221,37 +224,140 @@ const AccountManagement: React.FC = () => {
     return <RedirectToSignIn />;
   }
 
+  const displayName = user.fullName ?? user.primaryEmailAddress?.emailAddress ?? 'Ludobotics account';
+  const tabs: Array<{ id: AccountManagementTab; label: string; description: string }> = [
+    { id: 'overview', label: 'Overview', description: 'Your essential actions' },
+    { id: 'profile', label: 'Personal profile', description: 'Identity and security' },
+    { id: 'organization', label: 'Classroom', description: 'Members and invitations' },
+  ];
+
   return (
-    <div className="w-full space-y-8">
-      <ManagementPanel eyebrow="Account" title="Account management">
-        <UserProfile routing="hash" appearance={clerkAppearance} />
-      </ManagementPanel>
+    <div className="w-full space-y-6">
+      <section className="overflow-hidden rounded-2xl border border-ludo-cyan/25 bg-[#06101d]/95 shadow-[0_0_50px_rgba(0,255,255,0.08)]">
+        <div className="border-b border-white/10 bg-gradient-to-r from-ludo-cyan/[0.08] to-ludo-blue/[0.04] p-6 md:p-8">
+          <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
+            <div>
+              <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-ludo-cyan">Account workspace</span>
+              <h2 className="mt-3 font-orbitron text-2xl font-bold text-white">Welcome, {displayName}</h2>
+              <p className="mt-2 font-grotesk text-sm text-white/55">
+                {organization ? `${organization.name} · ${formatMembershipRole(membership?.role ?? 'member')}` : 'Choose or create an organization to begin.'}
+              </p>
+            </div>
+            {organization && (
+              <OrganizationSwitcher
+                hidePersonal
+                createOrganizationUrl="/organization/create"
+                createOrganizationMode="navigation"
+                organizationProfileUrl="/account/manage"
+                organizationProfileMode="navigation"
+                afterSelectOrganizationUrl="/account/manage"
+                appearance={clerkAppearance}
+              />
+            )}
+          </div>
+        </div>
 
-      <SignOutPanel />
+        <nav aria-label="Account sections" className="grid grid-cols-1 gap-2 border-b border-white/10 p-3 sm:grid-cols-3">
+          {tabs.map(tab => (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => setActiveTab(tab.id)}
+              className={`rounded-xl border px-4 py-3 text-left transition-colors ${activeTab === tab.id ? 'border-ludo-cyan/40 bg-ludo-cyan/10' : 'border-transparent hover:border-white/10 hover:bg-white/[0.035]'}`}
+            >
+              <span className={`block font-orbitron text-xs font-bold ${activeTab === tab.id ? 'text-ludo-cyan' : 'text-white/70'}`}>{tab.label}</span>
+              <span className="mt-1 block font-grotesk text-[11px] text-white/40">{tab.description}</span>
+            </button>
+          ))}
+        </nav>
+      </section>
 
-      <LauncherDownloadPanel />
-
-      {organization ? (
-        isTeacher ? (
-          <TeacherOrganizationSection
-            organizationName={organization.name}
-            role={membership?.role}
+      {activeTab === 'overview' && (
+        <div className="grid gap-5 lg:grid-cols-2">
+          {isTeacher && organization && (
+            <AccountActionCard
+              eyebrow="Classroom intelligence"
+              title="Teacher dashboard"
+              description="Review live progress, command accuracy, mistakes, and requests for help."
+              href="/account/teacher/dashboard"
+              action="Open dashboard"
+              featured
+            />
+          )}
+          <AccountActionCard
+            eyebrow="The Odyssey"
+            title="Launcher client"
+            description="Download the launcher used to install, update, and enter The Odyssey."
+            href={launcherDownloadPath}
+            action="Download client"
           />
+          <AccountActionCard
+            eyebrow="Classroom access"
+            title={organization?.name ?? 'Select an organization'}
+            description={organization ? 'Manage members, student invitations, roles, and organization settings.' : 'Select or create the organization that will contain your classroom.'}
+            onClick={() => setActiveTab('organization')}
+            action="Manage classroom"
+          />
+          <AccountActionCard
+            eyebrow="Personal settings"
+            title="Profile and security"
+            description="Update your identity, email addresses, password, and connected accounts."
+            onClick={() => setActiveTab('profile')}
+            action="Open profile"
+          />
+        </div>
+      )}
+
+      {activeTab === 'profile' && (
+        <div className="space-y-5">
+          <ManagementPanel eyebrow="Personal settings" title="Profile and security">
+            <UserProfile routing="hash" appearance={clerkAppearance} />
+          </ManagementPanel>
+          <SignOutPanel />
+        </div>
+      )}
+
+      {activeTab === 'organization' && (
+        organization ? (
+          isTeacher ? (
+            <TeacherOrganizationSection organizationName={organization.name} role={membership?.role} />
+          ) : (
+            <OrganizationMemberSummary organizationName={organization.name} role={membership?.role} />
+          )
         ) : (
-          <OrganizationMemberSummary organizationName={organization.name} role={membership?.role} />
+          <ManagementPanel eyebrow="Classroom" title="Select an organization">
+            <OrganizationList
+              hidePersonal
+              afterCreateOrganizationUrl="/account/manage"
+              afterSelectOrganizationUrl="/account/manage"
+              appearance={clerkAppearance}
+            />
+          </ManagementPanel>
         )
-      ) : (
-        <ManagementPanel eyebrow="Organization" title="No active organization">
-          <OrganizationList
-            hidePersonal
-            afterCreateOrganizationUrl="/account/manage"
-            afterSelectOrganizationUrl="/account/manage"
-            appearance={clerkAppearance}
-          />
-        </ManagementPanel>
       )}
     </div>
   );
+};
+
+const AccountActionCard: React.FC<{
+  eyebrow: string;
+  title: string;
+  description: string;
+  action: string;
+  href?: string;
+  onClick?: () => void;
+  featured?: boolean;
+}> = ({ eyebrow, title, description, action, href, onClick, featured = false }) => {
+  const className = `group flex min-h-56 flex-col rounded-2xl border p-6 text-left transition-all ${featured ? 'border-ludo-cyan/40 bg-gradient-to-br from-ludo-cyan/10 to-ludo-blue/5 hover:border-ludo-cyan' : 'border-white/10 bg-ludo-panel hover:border-ludo-cyan/45'}`;
+  const content = (
+    <>
+      <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-ludo-cyan">{eyebrow}</span>
+      <h3 className="mt-4 font-orbitron text-xl font-bold text-white">{title}</h3>
+      <p className="mt-3 flex-1 font-grotesk text-sm leading-relaxed text-white/55">{description}</p>
+      <span className="mt-6 font-orbitron text-xs uppercase tracking-widest text-ludo-cyan transition-transform group-hover:translate-x-1">{action} →</span>
+    </>
+  );
+  return href ? <a href={href} className={className}>{content}</a> : <button type="button" onClick={onClick} className={className}>{content}</button>;
 };
 
 const ProtectedOrganizationCreate: React.FC = () => {
