@@ -100,9 +100,11 @@ export const AccountPage: React.FC<AccountPageProps> = ({ path, isClerkConfigure
                 <h1 className="font-orbitron text-4xl md:text-5xl font-black leading-tight mb-5">
                   {routeLabel}
                 </h1>
-                <p className="font-grotesk text-lg text-ludo-muted leading-relaxed max-w-xl">
-                  {routeDescription}
-                </p>
+                {routeDescription && (
+                  <p className="font-grotesk text-lg text-ludo-muted leading-relaxed max-w-xl">
+                    {routeDescription}
+                  </p>
+                )}
 
               </div>
 
@@ -273,6 +275,7 @@ const AccountManagement: React.FC = () => {
       </section>
 
       {activeTab === 'overview' && (
+        <>
         <div className="grid gap-5 lg:grid-cols-2">
           {isTeacher && organization && (
             <AccountActionCard
@@ -306,6 +309,8 @@ const AccountManagement: React.FC = () => {
             action="Open profile"
           />
         </div>
+        <div className="mt-5"><SignOutPanel /></div>
+        </>
       )}
 
       {activeTab === 'profile' && (
@@ -425,8 +430,7 @@ const TeacherOrganizationSection: React.FC<{
         </div>
       </div>
       <OrganizationProfile
-        routing="path"
-        path="/account/manage"
+        routing="hash"
         afterLeaveOrganizationUrl="/account/manage"
         appearance={clerkAppearance}
       />
@@ -448,7 +452,7 @@ const SignOutPanel: React.FC = () => (
     <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
       <div>
         <span className="font-mono text-xs text-ludo-cyan uppercase tracking-widest">Session</span>
-        <h2 className="font-orbitron text-2xl text-white font-bold mt-2">Disconnect account</h2>
+        <h2 className="font-orbitron text-2xl text-white font-bold mt-2">Log out of account</h2>
         <p className="font-grotesk text-white/75 text-sm mt-1">
           Sign out of this browser and return to the account sign-in page.
         </p>
@@ -458,7 +462,7 @@ const SignOutPanel: React.FC = () => (
           type="button"
           className="inline-flex items-center justify-center border border-ludo-orange/70 text-ludo-orange px-5 py-3 font-orbitron text-sm uppercase tracking-widest hover:bg-ludo-orange hover:text-ludo-deep transition-colors"
         >
-          Disconnect
+          Log out
         </button>
       </SignOutButton>
     </div>
@@ -660,7 +664,7 @@ const getRouteDescription = (path: string) => {
   }
 
   if (path.startsWith('/account/manage')) {
-    return 'Manage your Ludobotics account first, then review your organization access on the same page.';
+    return '';
   }
 
   if (path.startsWith('/account/teacher') || path === '/account/sign-up') {
