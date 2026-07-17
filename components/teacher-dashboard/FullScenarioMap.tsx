@@ -12,8 +12,8 @@ import { DashboardStudent } from './dashboardData';
 type SelectedStep = { chapter: OdysseyScenarioChapter; step: OdysseyScenarioStep };
 type Position = { x: number; y: number };
 
-const nodeGap = 148;
-const graphPadding = 74;
+const graphWidth = 1120;
+const graphPadding = 72;
 
 function requirements(step: OdysseyScenarioStep): string[] {
   return step.requires?.allOf?.filter(id => id !== step.id) ?? [];
@@ -22,15 +22,54 @@ function requirements(step: OdysseyScenarioStep): string[] {
 function chapterLayout(chapter: OdysseyScenarioChapter) {
   const positions = new Map<string, Position>();
   const dependencies: Array<{ from: string; to: string }> = [];
-  chapter.steps.forEach((step, index) => {
-    positions.set(step.id, { x: graphPadding + index * nodeGap, y: 64 + (index % 2) * 32 });
-    requirements(step).forEach(from => dependencies.push({ from, to: step.id }));
+  const stepById = new Map(chapter.steps.map(step => [step.id, step]));
+  const depthByStep = new Map<string, number>();
+
+  const computeDepth = (step: OdysseyScenarioStep, visiting = new Set<string>()): number => {
+    const existing = depthByStep.get(step.id);
+    if (existing !== undefined) return existing;
+    if (visiting.has(step.id)) return 0;
+
+    const nextVisiting = new Set(visiting).add(step.id);
+    const prerequisiteDepths = requirements(step)
+      .map(id => stepById.get(id))
+      .filter((candidate): candidate is OdysseyScenarioStep => Boolean(candidate))
+      .map(candidate => computeDepth(candidate, nextVisiting) + 1);
+    const depth = prerequisiteDepths.length ? Math.max(...prerequisiteDepths) : 0;
+    depthByStep.set(step.id, depth);
+    return depth;
+  };
+
+  chapter.steps.forEach(step => {
+    computeDepth(step);
+    requirements(step).forEach(from => {
+      if (stepById.has(from)) dependencies.push({ from, to: step.id });
+    });
   });
+
+  const maxDepth = Math.max(0, ...depthByStep.values());
+  const groups = new Map<number, OdysseyScenarioStep[]>();
+  chapter.steps.forEach(step => {
+    const depth = depthByStep.get(step.id) ?? 0;
+    groups.set(depth, [...(groups.get(depth) ?? []), step]);
+  });
+  const maxBranchCount = Math.max(1, ...Array.from(groups.values(), group => group.length));
+  const height = Math.max(210, maxBranchCount * 96 + 118);
+
+  groups.forEach((group, depth) => {
+    const x = maxDepth === 0
+      ? graphWidth / 2
+      : graphPadding + (depth / maxDepth) * (graphWidth - graphPadding * 2);
+    const laneGap = Math.min(96, Math.max(58, (height - 116) / group.length));
+    const startY = height / 2 - ((group.length - 1) * laneGap) / 2;
+    group.forEach((step, lane) => positions.set(step.id, { x, y: startY + lane * laneGap }));
+  });
+
   return {
     positions,
     dependencies,
-    width: Math.max(760, graphPadding * 2 + Math.max(chapter.steps.length - 1, 0) * nodeGap),
-    height: 205,
+    width: graphWidth,
+    height,
   };
 }
 
