@@ -18,7 +18,7 @@ const team = [
     initials: 'RR',
     icon: BriefcaseBusiness,
     accent: 'from-ludo-blue/35 via-ludo-magenta/10 to-transparent',
-    linkedin: 'https://www.linkedin.com/search/results/people/?keywords=Rishekesh%20Ramesh',
+    linkedin: 'https://www.linkedin.com/in/rishekesh-ramesh-716b50197/',
   },
   {
     name: 'Prof. Dr. Miguel Olivares Mendez',

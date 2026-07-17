@@ -51,11 +51,11 @@ function App({ isClerkConfigured }: AppProps) {
         <Hero onOpenBeta={openBeta} />
         <Problem />
         <Solution />
-        <TeacherBenefits />
         <Features />
+        <TeacherBenefits />
         <Impact />
-        <Team />
         <Roadmap />
+        <Team />
         <CTA onOpenBeta={openBeta} />
       </main>
       <Footer />
