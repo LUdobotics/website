@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Braces, BriefcaseBusiness, Cpu, Rocket, UserRound, Users } from 'lucide-react';
+import { Braces, BriefcaseBusiness, Cpu, Linkedin, Rocket, UserRound, Users } from 'lucide-react';
 import { Section } from './ui/Section';
 
 const team = [
@@ -10,6 +10,7 @@ const team = [
     initials: 'LC',
     icon: Rocket,
     accent: 'from-ludo-cyan/30 via-ludo-blue/15 to-transparent',
+    linkedin: 'https://www.linkedin.com/in/lo%C3%AFck-chovet-0a8a13180/',
   },
   {
     name: 'Rishekesh Ramesh',
@@ -17,6 +18,7 @@ const team = [
     initials: 'RR',
     icon: BriefcaseBusiness,
     accent: 'from-ludo-blue/35 via-ludo-magenta/10 to-transparent',
+    linkedin: 'https://www.linkedin.com/search/results/people/?keywords=Rishekesh%20Ramesh',
   },
   {
     name: 'Prof. Dr. Miguel Olivares Mendez',
@@ -24,6 +26,7 @@ const team = [
     initials: 'MM',
     icon: Users,
     accent: 'from-ludo-magenta/25 via-ludo-blue/15 to-transparent',
+    linkedin: 'https://www.linkedin.com/in/miguel-olivares-mendez-8a952533/',
   },
   {
     name: 'Dr. Dave van der Meer',
@@ -31,6 +34,7 @@ const team = [
     initials: 'DM',
     icon: Braces,
     accent: 'from-ludo-green/25 via-ludo-cyan/10 to-transparent',
+    linkedin: 'https://www.linkedin.com/in/dave-van-der-meer/',
   },
 ];
 
@@ -64,7 +68,7 @@ export const Team: React.FC = () => (
           >
             <div className={`relative flex aspect-[4/3] items-center justify-center overflow-hidden bg-gradient-to-br ${member.accent}`}>
               <div className="absolute inset-0 opacity-30 [background-image:linear-gradient(rgba(255,255,255,.08)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.08)_1px,transparent_1px)] [background-size:28px_28px]" />
-              <div role="img" aria-label={`Placeholder portrait for `} className="relative flex h-28 w-28 items-center justify-center rounded-full border border-white/20 bg-ludo-deep/75 shadow-[0_0_45px_rgba(0,255,255,0.12)] backdrop-blur-sm">
+              <div role="img" aria-label={`Placeholder portrait for ${member.name}`} className="relative flex h-28 w-28 items-center justify-center rounded-full border border-white/20 bg-ludo-deep/75 shadow-[0_0_45px_rgba(0,255,255,0.12)] backdrop-blur-sm">
                 <UserRound size={42} className="absolute text-white/15" />
                 <span className="mt-16 font-mono text-xs font-bold tracking-[0.2em] text-ludo-cyan">{member.initials}</span>
               </div>
@@ -73,13 +77,32 @@ export const Team: React.FC = () => (
               </span>
               <span className="absolute bottom-3 left-4 font-mono text-[8px] uppercase tracking-[0.22em] text-white/30">Portrait coming soon</span>
             </div>
-            <div className="min-h-36 p-5">
+            <div className="flex min-h-44 flex-col p-5">
               <h3 className="font-orbitron text-base font-bold leading-snug text-white">{member.name}</h3>
               <p className="mt-3 font-grotesk text-sm leading-relaxed text-ludo-cyan/75">{member.role}</p>
+              <a
+                href={member.linkedin}
+                target="_blank"
+                rel="noreferrer"
+                aria-label={`View ${member.name} on LinkedIn`}
+                className="mt-auto inline-flex w-fit items-center gap-2 rounded-lg border border-[#0a66c2]/35 bg-[#0a66c2]/10 px-3 py-2 font-mono text-[9px] font-bold uppercase tracking-[0.14em] text-[#70b7ff] transition hover:border-[#0a66c2]/70 hover:bg-[#0a66c2]/20 hover:text-white"
+              >
+                <Linkedin size={14} /> LinkedIn
+              </a>
             </div>
           </motion.article>
         ))}
       </div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 14 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        className="mx-auto mt-8 flex max-w-2xl items-center justify-center gap-3 rounded-2xl border border-dashed border-ludo-cyan/25 bg-ludo-cyan/[0.045] px-6 py-5 text-center"
+      >
+        <Users size={20} className="shrink-0 text-ludo-cyan" />
+        <p className="font-grotesk text-sm font-medium text-white/60 sm:text-base">And multiple freelance artists and pedagogical experts</p>
+      </motion.div>
     </div>
   </Section>
 );
