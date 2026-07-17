@@ -50,7 +50,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenBeta, onOpenSneakPeek }) =
         </a>
 
         {/* Desktop Nav */}
-        <div className="hidden md:flex items-center gap-8">
+        <div className="hidden lg:flex items-center gap-5 xl:gap-8">
           {NAV_ITEMS.map((item) => (
             <button
               key={item.label}
@@ -71,7 +71,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenBeta, onOpenSneakPeek }) =
 
         {/* Mobile Toggle */}
         <button
-          className="md:hidden text-white"
+          className="lg:hidden text-white"
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
         >
           {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
@@ -85,7 +85,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenBeta, onOpenSneakPeek }) =
             initial={{ opacity: 0, x: '100%' }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: '100%' }}
-            className="fixed inset-0 bg-ludo-deep z-40 flex flex-col items-center justify-center gap-8 md:hidden"
+            className="fixed inset-0 bg-ludo-deep z-40 flex flex-col items-center justify-center gap-8 lg:hidden"
           >
             <button
               className="absolute top-6 right-6 text-white p-2 hover:text-ludo-cyan transition-colors"

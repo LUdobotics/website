@@ -32,6 +32,7 @@ Direct URLs:
 - `/account/student/sign-in` - student sign-in route
 - `/account/sign-in` - sign in to an existing account
 - `/account/manage` - manage the signed-in user's account and organization access
+- `/account/teacher/dashboard` - live teacher telemetry for the active organization
 - `/organization/manage` - legacy compatibility URL that redirects to `/account/manage`
 - `/launcher_download_client` - launcher client download page
 
@@ -41,6 +42,7 @@ Teacher workflow:
 2. After account creation, the teacher is redirected to `/organization/create`.
 3. After creating an organization, the teacher lands on `/account/manage`.
 4. The teacher invites students from the organization members/invitations interface shown below the account manager.
+5. The teacher opens `/account/teacher/dashboard` to monitor live Odyssey telemetry.
 
 Student workflow:
 
@@ -54,7 +56,10 @@ Required local environment variable:
 
 ```bash
 VITE_CLERK_PUBLISHABLE_KEY=pk_test_your_publishable_key
+VITE_ODYSSEY_BACKEND_URL=http://127.0.0.1:8000
 ```
+
+`VITE_ODYSSEY_BACKEND_URL` must point to the same Odyssey backend used by the launcher. The teacher dashboard sends the active Clerk session token to `/organisations/current/teacher-dashboard` and refreshes its snapshot every 15 seconds.
 
 For production, set the same variable in the environment used to build the static site before running `npm run build` or `npm run deploy`.
 

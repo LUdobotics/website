@@ -14,6 +14,7 @@ import {
 } from '@clerk/react';
 import { ArrowLeft } from 'lucide-react';
 import { Section } from './ui/Section';
+import { TeacherDashboardPage } from './TeacherDashboardPage';
 
 interface AccountPageProps {
   path: string;
@@ -54,6 +55,7 @@ const routeLabels: Record<string, string> = {
   '/account': 'Account workflows',
   '/account/sign-up': 'Teacher onboarding',
   '/account/teacher/sign-up': 'Teacher onboarding',
+  '/account/teacher/dashboard': 'Classroom intelligence',
   '/account/student/invitation': 'Student invitation',
   '/account/student/sign-in': 'Student sign in',
   '/account/sign-in': 'Sign in',
@@ -66,7 +68,8 @@ const routeLabels: Record<string, string> = {
 export const AccountPage: React.FC<AccountPageProps> = ({ path, isClerkConfigured }) => {
   const routeLabel = getRouteLabel(path);
   const routeDescription = getRouteDescription(path);
-  const isManagementRoute = path.startsWith('/account/manage') || path.startsWith('/organization/manage');
+  const isDashboardRoute = path.startsWith('/account/teacher/dashboard');
+  const isManagementRoute = path.startsWith('/account/manage') || path.startsWith('/organization/manage') || isDashboardRoute;
 
   return (
     <div className="min-h-screen bg-ludo-deep text-white selection:bg-ludo-cyan selection:text-ludo-deep">
@@ -76,7 +79,7 @@ export const AccountPage: React.FC<AccountPageProps> = ({ path, isClerkConfigure
         <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-ludo-magenta/10 rounded-full blur-[150px] translate-y-1/2 -translate-x-1/2" />
 
         <div className="container mx-auto px-6 relative z-10 py-16 md:py-24">
-          <div className="max-w-5xl mx-auto">
+          <div className={`${isDashboardRoute ? 'max-w-7xl' : 'max-w-5xl'} mx-auto`}>
             <a
               href="/"
               className="inline-flex items-center gap-2 text-ludo-muted hover:text-ludo-cyan transition-colors font-mono text-xs uppercase tracking-widest mb-10"
@@ -90,7 +93,7 @@ export const AccountPage: React.FC<AccountPageProps> = ({ path, isClerkConfigure
                 <div className="inline-flex items-center gap-2 px-3 py-1 mb-6 border border-ludo-cyan/30 rounded-full bg-ludo-cyan/5 backdrop-blur-sm">
                   <span className="w-2 h-2 rounded-full bg-ludo-green animate-pulse" />
                   <span className="font-mono text-xs text-ludo-cyan tracking-widest uppercase">
-                    Hidden account route
+                    {isDashboardRoute ? 'Teacher workspace' : 'Hidden account route'}
                   </span>
                 </div>
 
@@ -118,6 +121,10 @@ export const AccountPage: React.FC<AccountPageProps> = ({ path, isClerkConfigure
 const ClerkAccountSurface: React.FC<{ path: string }> = ({ path }) => {
   if (path === '/account') {
     return <AccountWorkflowLinks />;
+  }
+
+  if (path.startsWith('/account/teacher/dashboard')) {
+    return <TeacherDashboardPage />;
   }
 
   if (path.startsWith('/account/sign-in') || path.startsWith('/account/student/sign-in')) {
@@ -292,7 +299,13 @@ const TeacherOrganizationSection: React.FC<{
               <p className="font-mono text-xs text-white/75 mt-3 uppercase tracking-widest">Role: {formatMembershipRole(role)}</p>
             )}
           </div>
-          <div className="flex justify-start md:justify-end">
+          <div className="flex flex-wrap items-center justify-start gap-3 md:justify-end">
+            <a
+              href="/account/teacher/dashboard"
+              className="inline-flex items-center justify-center border border-ludo-cyan bg-ludo-cyan px-4 py-2.5 font-orbitron text-xs uppercase tracking-widest text-ludo-deep transition-colors hover:bg-transparent hover:text-ludo-cyan"
+            >
+              Open dashboard
+            </a>
             <OrganizationSwitcher
               hidePersonal
               createOrganizationUrl="/organization/create"
@@ -536,6 +549,10 @@ const getRouteLabel = (path: string) => {
 };
 
 const getRouteDescription = (path: string) => {
+  if (path.startsWith('/account/teacher/dashboard')) {
+    return 'Live progress, command accuracy, mistakes, and help signals from students in your active organization.';
+  }
+
   if (path.startsWith('/account/manage')) {
     return 'Manage your Ludobotics account first, then review your organization access on the same page.';
   }

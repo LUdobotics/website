@@ -17,6 +17,7 @@ import { NavItem, Feature, Metric, RoadmapItem, ProblemCard } from './types';
 export const NAV_ITEMS: NavItem[] = [
   { label: 'Problem', href: '#problem' },
   { label: 'Solution', href: '#solution' },
+  { label: 'For Teachers', href: '#teachers' },
   { label: 'Features', href: '#features' },
   { label: 'Roadmap', href: '#roadmap' },
 ];
