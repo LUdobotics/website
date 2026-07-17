@@ -98,10 +98,15 @@ export const Team: React.FC = () => (
         initial={{ opacity: 0, y: 14 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
-        className="mx-auto mt-8 flex max-w-2xl items-center justify-center gap-3 rounded-2xl border border-dashed border-ludo-cyan/25 bg-ludo-cyan/[0.045] px-6 py-5 text-center"
+        className="mx-auto mt-10 flex max-w-3xl flex-col items-center gap-4 rounded-2xl border border-ludo-cyan/35 bg-gradient-to-r from-ludo-cyan/10 via-ludo-blue/10 to-ludo-magenta/10 px-7 py-6 text-center shadow-[0_0_40px_rgba(0,255,255,0.08)] sm:flex-row sm:text-left"
       >
-        <Users size={20} className="shrink-0 text-ludo-cyan" />
-        <p className="font-grotesk text-sm font-medium text-white/60 sm:text-base">And multiple freelance artists and pedagogical experts</p>
+        <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-ludo-cyan/35 bg-ludo-deep/70 text-ludo-cyan shadow-[0_0_20px_rgba(0,255,255,0.12)]">
+          <Users size={22} />
+        </span>
+        <span>
+          <span className="block font-mono text-[9px] uppercase tracking-[0.2em] text-ludo-cyan">Extended creative &amp; education team</span>
+          <span className="mt-2 block font-grotesk text-base font-semibold leading-relaxed text-white/85 sm:text-lg">And multiple freelance artists and pedagogical experts</span>
+        </span>
       </motion.div>
     </div>
   </Section>
