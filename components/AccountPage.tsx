@@ -667,8 +667,8 @@ const getRouteDescription = (path: string) => {
     return '';
   }
 
-  if (path.startsWith('/account/teacher') || path === '/account/sign-up') {
-    return 'Teachers create a Ludobotics account first, then create an organization for their classroom or training group.';
+  if (path.startsWith('/account/teacher/sign-up') || path === '/account/sign-up') {
+    return 'This page is for teachers creating an account for a new organization. If your organization already has an account, please request an invitation from its administrator.';
   }
 
   if (path.startsWith('/account/student')) {
