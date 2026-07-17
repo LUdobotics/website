@@ -17,10 +17,10 @@ import { NavItem, Feature, Metric, RoadmapItem, ProblemCard } from './types';
 export const NAV_ITEMS: NavItem[] = [
   { label: 'Problem', href: '#problem' },
   { label: 'Solution', href: '#solution' },
-  { label: 'For Teachers', href: '#teachers' },
   { label: 'Features', href: '#features' },
-  { label: 'Team', href: '#team' },
+  { label: 'For Teachers', href: '#teachers' },
   { label: 'Roadmap', href: '#roadmap' },
+  { label: 'Team', href: '#team' },
 ];
 
 export const PROBLEMS: ProblemCard[] = [
@@ -86,7 +86,7 @@ export const METRICS: Metric[] = [
 
 export const ROADMAP: RoadmapItem[] = [
   {
-    date: "Early 2026",
+    date: "Right now",
     title: "Beta Program & Educator Feedback",
     description: "Selected institutions gain early access. We incorporate real educator and learner insights to shape the final product.",
   },
