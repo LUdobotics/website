@@ -60,6 +60,15 @@ const clerkAppearance = {
   },
 };
 
+const organizationSwitcherAppearance = {
+  ...clerkAppearance,
+  elements: {
+    ...clerkAppearance.elements,
+    rootBox: 'w-auto',
+    organizationSwitcherTrigger: 'w-auto',
+  },
+};
+
 const routeLabels: Record<string, string> = {
   '/account': 'Account workflows',
   '/account/sign-up': 'Teacher onboarding',
@@ -372,7 +381,7 @@ const AccountManagement: React.FC = () => {
                 organizationProfileUrl="/account/manage"
                 organizationProfileMode="navigation"
                 afterSelectOrganizationUrl="/account/manage"
-                appearance={clerkAppearance}
+                appearance={organizationSwitcherAppearance}
               />
             )}
           </div>
@@ -529,7 +538,7 @@ const TeacherOrganizationSection: React.FC<{
               organizationProfileUrl="/account/manage"
               organizationProfileMode="navigation"
               afterSelectOrganizationUrl="/account/manage"
-              appearance={clerkAppearance}
+              appearance={organizationSwitcherAppearance}
             />
           </div>
         </div>
@@ -694,6 +703,16 @@ const ClerkTextOverrides: React.FC = () => (
       opacity: 1 !important;
     }
 
+    .clerk-account-surface [class*="formFieldInput"]:not([autocomplete="one-time-code"]),
+    .clerk-account-surface [class*="formFieldInput"]:not([autocomplete="one-time-code"]) *,
+    .clerk-account-surface [class*="tagInput"],
+    .clerk-account-surface [class*="tagInput"] *,
+    .clerk-account-surface [class*="TagInput"],
+    .clerk-account-surface [class*="TagInput"] * {
+      color: #020810 !important;
+      -webkit-text-fill-color: #020810 !important;
+    }
+
     .clerk-account-surface input[autocomplete="one-time-code"],
     .clerk-account-surface input[inputmode="numeric"] {
       color: transparent !important;
@@ -763,6 +782,22 @@ const ClerkTextOverrides: React.FC = () => (
     .clerk-account-surface .cl-navbarButton:hover *,
     .clerk-account-surface .cl-menuButton:hover,
     .clerk-account-surface .cl-menuButton:hover * {
+      color: #00ffff !important;
+      -webkit-text-fill-color: #00ffff !important;
+    }
+
+    .cl-organizationSwitcherPopoverCard,
+    .cl-organizationSwitcherPopoverCard p,
+    .cl-organizationSwitcherPopoverCard span,
+    .cl-organizationSwitcherPopoverCard button,
+    .cl-organizationSwitcherPopoverCard [class*="Identifier"],
+    .cl-organizationSwitcherPopoverCard [class*="ButtonText"] {
+      color: rgba(255, 255, 255, 0.92) !important;
+      -webkit-text-fill-color: rgba(255, 255, 255, 0.92) !important;
+    }
+
+    .cl-organizationSwitcherPopoverCard button:hover,
+    .cl-organizationSwitcherPopoverCard button:hover * {
       color: #00ffff !important;
       -webkit-text-fill-color: #00ffff !important;
     }
