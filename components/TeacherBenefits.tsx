@@ -86,7 +86,7 @@ export const TeacherBenefits: React.FC = () => {
           </p>
         </div>
 
-        <div className="mt-14 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mx-auto mt-14 grid max-w-5xl grid-cols-1 gap-4 sm:grid-cols-2">
           {benefits.map((benefit, index) => (
             <motion.article
               key={benefit.title}
