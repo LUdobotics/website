@@ -38,8 +38,8 @@ const clerkAppearance = {
     colorBackground: '#020810',
     colorText: '#ffffff',
     colorTextSecondary: 'rgba(255, 255, 255, 0.82)',
-    colorInputBackground: 'rgba(10, 20, 40, 0.85)',
-    colorInputText: '#ffffff',
+    colorInputBackground: '#ffffff',
+    colorInputText: '#020810',
     borderRadius: '0.75rem',
     fontFamily: 'Space Grotesk, sans-serif',
   },
@@ -50,6 +50,9 @@ const clerkAppearance = {
     headerTitle: 'font-orbitron text-white',
     headerSubtitle: 'text-white/80',
     formFieldLabel: 'text-white/90',
+    formFieldInput: 'bg-white text-ludo-deep placeholder:text-slate-500',
+    navbarButton: 'text-white hover:text-ludo-cyan',
+    menuButton: 'text-white hover:text-ludo-cyan',
     formButtonPrimary: 'font-orbitron uppercase tracking-widest text-ludo-deep',
     footerActionText: 'text-white/70',
     footerActionLink: 'text-ludo-cyan',
@@ -678,6 +681,19 @@ const ClerkTextOverrides: React.FC = () => (
       color: #020810 !important;
     }
 
+    .cl-formFieldInput:not([autocomplete="one-time-code"]):not([inputmode="numeric"]),
+    .cl-formFieldInput:not([autocomplete="one-time-code"]):not([inputmode="numeric"]):focus {
+      background: #ffffff !important;
+      color: #020810 !important;
+      -webkit-text-fill-color: #020810 !important;
+    }
+
+    .cl-formFieldInput:not([autocomplete="one-time-code"]):not([inputmode="numeric"])::placeholder {
+      color: #64748b !important;
+      -webkit-text-fill-color: #64748b !important;
+      opacity: 1 !important;
+    }
+
     .clerk-account-surface input[autocomplete="one-time-code"],
     .clerk-account-surface input[inputmode="numeric"] {
       color: transparent !important;
@@ -733,6 +749,22 @@ const ClerkTextOverrides: React.FC = () => (
     .clerk-account-surface .cl-profilePage .cl-headerTitle,
     .clerk-account-surface .cl-profileSectionTitleText {
       color: #ffffff !important;
+    }
+
+    .clerk-account-surface .cl-navbarButton,
+    .clerk-account-surface .cl-navbarButton *,
+    .clerk-account-surface .cl-menuButton,
+    .clerk-account-surface .cl-menuButton * {
+      color: rgba(255, 255, 255, 0.92) !important;
+      -webkit-text-fill-color: rgba(255, 255, 255, 0.92) !important;
+    }
+
+    .clerk-account-surface .cl-navbarButton:hover,
+    .clerk-account-surface .cl-navbarButton:hover *,
+    .clerk-account-surface .cl-menuButton:hover,
+    .clerk-account-surface .cl-menuButton:hover * {
+      color: #00ffff !important;
+      -webkit-text-fill-color: #00ffff !important;
     }
 
     .clerk-account-surface .cl-footerActionLink,
