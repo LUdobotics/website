@@ -410,20 +410,6 @@ const AccountManagement: React.FC = () => {
             href={launcherDownloadPath}
             action="Download client"
           />
-          <AccountActionCard
-            eyebrow="Classroom access"
-            title={organization?.name ?? 'Select an organization'}
-            description={organization ? 'Manage members, student invitations, roles, and organization settings.' : 'Select or create the organization that will contain your classroom.'}
-            onClick={() => setActiveTab('organization')}
-            action="Manage classroom"
-          />
-          <AccountActionCard
-            eyebrow="Personal settings"
-            title="Profile and security"
-            description="Update your identity, email addresses, password, and connected accounts."
-            onClick={() => setActiveTab('profile')}
-            action="Open profile"
-          />
         </div>
         <div className="mt-5"><SignOutPanel /></div>
         </>

@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { RedirectToSignIn, useAuth, useOrganization } from '@clerk/react';
-import { AlertTriangle, ArrowLeft, Building2, RefreshCw, ServerOff } from 'lucide-react';
+import { AlertTriangle, Building2, RefreshCw, ServerOff } from 'lucide-react';
 import { TeacherDashboardView } from './teacher-dashboard/TeacherDashboardView';
 import { FullScenarioMap } from './teacher-dashboard/FullScenarioMap';
 import {
@@ -113,13 +113,10 @@ export const TeacherDashboardPage: React.FC = () => {
   return (
     <div className="w-full space-y-5">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <a href="/account/manage" className="inline-flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-white/50 transition-colors hover:text-ludo-cyan">
-          <ArrowLeft size={15} /> Account management
-        </a>
         <button
           type="button"
           onClick={() => void loadDashboard()}
-          className="inline-flex items-center justify-center gap-2 rounded-lg border border-ludo-cyan/30 px-4 py-2 font-mono text-[10px] uppercase tracking-widest text-ludo-cyan transition-colors hover:bg-ludo-cyan/10"
+          className="ml-auto inline-flex items-center justify-center gap-2 rounded-lg border border-ludo-cyan/30 px-4 py-2 font-mono text-[10px] uppercase tracking-widest text-ludo-cyan transition-colors hover:bg-ludo-cyan/10"
         >
           <RefreshCw size={14} /> Refresh telemetry
         </button>
