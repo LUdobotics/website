@@ -120,7 +120,7 @@ export const TeacherBenefits: React.FC = () => {
               onClick={() => setIsPreviewOpen(open => !open)}
               className="group flex w-full flex-col gap-5 p-5 text-left transition-colors hover:bg-ludo-cyan/[0.035] sm:flex-row sm:items-center sm:p-7"
             >
-              <span className="inline-flex shrink-0 items-center gap-2 self-start rounded-lg border border-ludo-cyan bg-ludo-cyan px-4 py-3 font-orbitron text-[10px] font-bold uppercase tracking-wider text-ludo-deep shadow-[0_0_24px_rgba(0,255,255,0.22)] transition group-hover:border-white group-hover:bg-white">
+              <span className="inline-flex shrink-0 items-center gap-2 self-center rounded-lg border border-ludo-cyan bg-ludo-cyan px-4 py-3 font-orbitron text-[10px] font-bold uppercase tracking-wider text-ludo-deep shadow-[0_0_24px_rgba(0,255,255,0.22)] transition group-hover:border-white group-hover:bg-white">
                 {isPreviewOpen ? 'Hide dashboard' : 'Click here to visualize'}
                 <ChevronDown size={18} className={`transition-transform duration-300 ${isPreviewOpen ? 'rotate-180' : ''}`} />
               </span>

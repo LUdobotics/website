@@ -69,7 +69,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenBeta, onOpenSneakPeek }) => {
           >
             <div className="relative w-full rounded-2xl overflow-hidden border border-ludo-border bg-ludo-panel/50 backdrop-blur-sm shadow-[0_0_50px_rgba(0,255,255,0.1)] group">
               <iframe
-                src="https://www.youtube.com/embed/DOboWd8L6Nw"
+                src="https://www.youtube.com/embed/DOboWd8L6Nw?autoplay=1&mute=1&playsinline=1"
                 title="The Odyssey game trailer"
                 className="aspect-video w-full"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
