@@ -75,12 +75,12 @@ export const LauncherDownloadStudent: React.FC = () => {
                   className="bg-ludo-panel border border-ludo-border/40 rounded-xl p-6"
                 >
                   <div className="mb-5 flex items-center justify-between">
+                    <span className="flex h-12 w-12 items-center justify-center rounded-xl border border-ludo-cyan/40 bg-ludo-cyan/10 font-orbitron text-2xl font-black text-ludo-cyan">
+                      {index + 1}
+                    </span>
                     <div className="w-12 h-12 bg-gradient-to-br from-ludo-cyan/20 to-ludo-blue/20 rounded-xl flex items-center justify-center border border-ludo-cyan/30">
                       <step.icon className="text-ludo-cyan" size={24} />
                     </div>
-                    <span className="flex h-8 w-8 items-center justify-center rounded-full border border-ludo-cyan/40 bg-ludo-cyan/10 font-orbitron text-sm font-black text-ludo-cyan">
-                      {index + 1}
-                    </span>
                   </div>
                   <h2 className="font-orbitron text-lg font-bold text-white mb-3">
                     {step.title}
