@@ -1,18 +1,15 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
-import { ChevronRight, PlayCircle } from 'lucide-react';
+import { Images } from 'lucide-react';
 import { Button } from './ui/Button';
 import { Section } from './ui/Section';
-import { VideoModal } from './ui/VideoModal';
-import heroImage from '../assets/hero_image.png';
 
 interface HeroProps {
   onOpenBeta: () => void;
+  onOpenSneakPeek: () => void;
 }
 
-export const Hero: React.FC<HeroProps> = ({ onOpenBeta }) => {
-  const [isVideoOpen, setIsVideoOpen] = useState(false);
-
+export const Hero: React.FC<HeroProps> = ({ onOpenBeta, onOpenSneakPeek }) => {
   return (
     <Section className="min-h-screen flex items-center relative" noPadding>
       {/* Background Elements */}
@@ -54,8 +51,8 @@ export const Hero: React.FC<HeroProps> = ({ onOpenBeta }) => {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4">
-              <Button icon={<PlayCircle size={20} />} onClick={() => setIsVideoOpen(true)}>
-                Watch Trailer
+              <Button icon={<Images size={20} />} onClick={onOpenSneakPeek}>
+                Sneak Peek
               </Button>
               <Button variant="secondary" onClick={onOpenBeta}>
                 Join Beta
@@ -71,15 +68,16 @@ export const Hero: React.FC<HeroProps> = ({ onOpenBeta }) => {
             className="relative mt-16 md:mt-0"
           >
             <div className="relative w-full rounded-2xl overflow-hidden border border-ludo-border bg-ludo-panel/50 backdrop-blur-sm shadow-[0_0_50px_rgba(0,255,255,0.1)] group">
-              {/* Mockup Image Placeholder */}
-              <img
-                src={heroImage}
-                alt="The Odyssey Gameplay"
-                className="w-full h-auto transition-all duration-700"
+              <iframe
+                src="https://www.youtube.com/embed/DOboWd8L6Nw"
+                title="The Odyssey game trailer"
+                className="aspect-video w-full"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
               />
 
               {/* Overlay UI Mockup Elements */}
-              <div className="absolute top-4 left-4 right-4 flex justify-between font-mono text-xs text-ludo-cyan">
+              <div className="pointer-events-none absolute top-4 left-4 right-4 flex justify-between font-mono text-xs text-ludo-cyan">
                 <span>SYS.ONLINE</span>
                 <span>ROS 2: ACTIVE</span>
               </div>
@@ -99,12 +97,6 @@ export const Hero: React.FC<HeroProps> = ({ onOpenBeta }) => {
 
         </div>
       </div>
-
-      <VideoModal
-        isOpen={isVideoOpen}
-        onClose={() => setIsVideoOpen(false)}
-        videoUrl="https://www.youtube.com/embed/DOboWd8L6Nw"
-      />
     </Section >
   );
 };

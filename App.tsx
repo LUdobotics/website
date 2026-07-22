@@ -48,7 +48,7 @@ function App({ isClerkConfigured }: AppProps) {
     <div className="min-h-screen bg-ludo-deep text-white selection:bg-ludo-cyan selection:text-ludo-deep">
       <Navbar onOpenBeta={openBeta} onOpenSneakPeek={openSneakPeek} />
       <main>
-        <Hero onOpenBeta={openBeta} />
+        <Hero onOpenBeta={openBeta} onOpenSneakPeek={openSneakPeek} />
         <Problem />
         <Solution />
         <Features />
