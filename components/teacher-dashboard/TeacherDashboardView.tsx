@@ -182,7 +182,7 @@ export const TeacherDashboardView: React.FC<TeacherDashboardViewProps> = ({
                     <button
                       type="button"
                       onClick={() => setExpandedStudentId(expanded ? null : student.id)}
-                      className="grid w-full grid-cols-[minmax(0,1.5fr)_70px] items-center gap-3 px-3 py-3 text-left transition-colors hover:bg-white/[0.035] sm:grid-cols-[minmax(0,1.5fr)_100px_minmax(120px,1fr)_70px] sm:px-4"
+                      className="grid w-full grid-cols-[minmax(0,1.5fr)_56px_70px] items-center gap-3 px-3 py-3 text-left transition-colors hover:bg-white/[0.035] sm:grid-cols-[minmax(0,1.5fr)_100px_minmax(120px,1fr)_64px_70px] sm:px-4"
                     >
                       <span className="flex min-w-0 items-center gap-2.5">
                         {expanded ? <ChevronDown size={13} className="shrink-0 text-white/35" /> : <ChevronRight size={13} className="shrink-0 text-white/35" />}
@@ -202,6 +202,9 @@ export const TeacherDashboardView: React.FC<TeacherDashboardViewProps> = ({
                         <span className="block h-1.5 overflow-hidden rounded-full bg-white/10">
                           <motion.span className="block h-full rounded-full bg-gradient-to-r from-ludo-blue to-ludo-cyan" animate={{ width: `${student.progress}%` }} transition={{ duration: 0.9, ease: 'easeOut' }} />
                         </span>
+                      </span>
+                      <span className="text-right font-mono text-[10px] font-bold text-ludo-cyan" title="Score">
+                        {student.maxScore ? `${student.score}/${student.maxScore}` : student.score}
                       </span>
                       <span className="hidden text-right font-mono text-[9px] text-white/40 sm:block">{student.lastSeen}</span>
                     </button>

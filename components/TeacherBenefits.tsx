@@ -118,8 +118,12 @@ export const TeacherBenefits: React.FC = () => {
               aria-expanded={isPreviewOpen}
               aria-controls="teacher-dashboard-preview"
               onClick={() => setIsPreviewOpen(open => !open)}
-              className="group flex w-full flex-col gap-5 p-5 text-left transition-colors hover:bg-ludo-cyan/[0.035] sm:flex-row sm:items-center sm:justify-between sm:p-7"
+              className="group flex w-full flex-col gap-5 p-5 text-left transition-colors hover:bg-ludo-cyan/[0.035] sm:flex-row sm:items-center sm:p-7"
             >
+              <span className="inline-flex shrink-0 items-center gap-2 self-start rounded-lg border border-ludo-cyan bg-ludo-cyan px-4 py-3 font-orbitron text-[10px] font-bold uppercase tracking-wider text-ludo-deep shadow-[0_0_24px_rgba(0,255,255,0.22)] transition group-hover:border-white group-hover:bg-white">
+                {isPreviewOpen ? 'Hide dashboard' : 'Click here to visualize'}
+                <ChevronDown size={18} className={`transition-transform duration-300 ${isPreviewOpen ? 'rotate-180' : ''}`} />
+              </span>
               <span className="flex min-w-0 items-center gap-4">
                 <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-ludo-cyan/30 bg-ludo-cyan/10 text-ludo-cyan shadow-[0_0_22px_rgba(0,255,255,0.12)]">
                   <Activity size={22} />
@@ -132,14 +136,10 @@ export const TeacherBenefits: React.FC = () => {
                   <span className="mt-1 block font-grotesk text-sm text-white/50">Follow a simulated class as progress, scores and interventions evolve.</span>
                 </span>
               </span>
-              <span className="flex shrink-0 flex-wrap items-center justify-end gap-3 self-end sm:self-auto">
+              <span className="flex shrink-0 flex-wrap items-center gap-3 sm:ml-auto">
                 <span className="hidden gap-2 font-mono text-[9px] uppercase tracking-wider sm:flex">
                   <span className="rounded-full border border-ludo-green/25 bg-ludo-green/10 px-3 py-1.5 text-ludo-green">Live simulation</span>
                   <span className="rounded-full border border-white/10 px-3 py-1.5 text-white/45">{students.length} students</span>
-                </span>
-                <span className="inline-flex items-center gap-2 rounded-lg border border-ludo-cyan bg-ludo-cyan px-4 py-3 font-orbitron text-[10px] font-bold uppercase tracking-wider text-ludo-deep shadow-[0_0_24px_rgba(0,255,255,0.22)] transition group-hover:bg-white group-hover:border-white">
-                  {isPreviewOpen ? 'Hide dashboard' : 'Click here to visualize'}
-                  <ChevronDown size={18} className={`transition-transform duration-300 ${isPreviewOpen ? 'rotate-180' : ''}`} />
                 </span>
               </span>
             </button>
