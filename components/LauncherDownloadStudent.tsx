@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { AlertTriangle, CheckCircle2, Download, FileCode2, Terminal } from 'lucide-react';
+import { AlertTriangle, ArrowLeft, CheckCircle2, Download, FileCode2, Terminal } from 'lucide-react';
 import { Section } from './ui/Section';
 
 const downloadUrl = 'https://dl.patchkit.net/d/21plmqaazwhzt3484oibu/direct';
@@ -33,6 +33,14 @@ export const LauncherDownloadStudent: React.FC = () => {
 
         <div className="container mx-auto px-6 relative z-10 py-16 md:py-24">
           <div className="max-w-5xl mx-auto">
+            <a
+              href="/account/manage"
+              className="mb-10 inline-flex items-center gap-2 rounded-lg border border-white/10 bg-ludo-panel/70 px-3 py-2 font-mono text-[10px] uppercase tracking-widest text-white/55 transition-colors hover:border-ludo-cyan/35 hover:text-ludo-cyan"
+            >
+              <ArrowLeft size={14} />
+              Account management
+            </a>
+
             <motion.div
               initial={{ opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}

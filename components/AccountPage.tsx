@@ -75,7 +75,10 @@ export const AccountPage: React.FC<AccountPageProps> = ({ path, isClerkConfigure
   const routeLabel = getRouteLabel(path);
   const routeDescription = getRouteDescription(path);
   const isDashboardRoute = path.startsWith('/account/teacher/dashboard');
+  const isAccountManagementRoute = path.startsWith('/account/manage');
   const isManagementRoute = path.startsWith('/account/manage') || path.startsWith('/organization/manage') || isDashboardRoute;
+  const backHref = isAccountManagementRoute ? '/' : '/account/manage';
+  const backLabel = isAccountManagementRoute ? 'Back to Ludobotics' : 'Account management';
 
   return (
     <div className="min-h-screen bg-ludo-deep text-white selection:bg-ludo-cyan selection:text-ludo-deep">
@@ -87,11 +90,11 @@ export const AccountPage: React.FC<AccountPageProps> = ({ path, isClerkConfigure
         <div className="container mx-auto px-6 relative z-10 py-16 md:py-24">
           <div className={`${isDashboardRoute ? 'max-w-7xl' : 'max-w-5xl'} mx-auto`}>
             <a
-              href="/"
+              href={backHref}
               className="inline-flex items-center gap-2 text-ludo-muted hover:text-ludo-cyan transition-colors font-mono text-xs uppercase tracking-widest mb-10"
             >
               <ArrowLeft size={16} />
-              Back to Ludobotics
+              {backLabel}
             </a>
 
             <div className={isManagementRoute ? 'space-y-10' : 'grid grid-cols-1 lg:grid-cols-[0.85fr_1.15fr] gap-10 items-start'}>
