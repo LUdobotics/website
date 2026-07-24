@@ -209,7 +209,7 @@ export const TeacherDashboardView: React.FC<TeacherDashboardViewProps> = ({
                           <motion.span className="block h-full rounded-full bg-gradient-to-r from-ludo-blue to-ludo-cyan shadow-[0_0_10px_rgba(0,255,255,0.35)]" animate={{ width: `${student.progress}%` }} transition={{ duration: 0.9, ease: 'easeOut' }} />
                         </span>
                       </span>
-                      <span className="hidden text-right sm:block">
+                      <span className="text-right">
                         <motion.span key={student.score} initial={{ opacity: 0.35, y: 3 }} animate={{ opacity: 1, y: 0 }} className="block font-orbitron text-xs font-bold text-ludo-cyan">
                           {student.score}/{student.maxScore || 100}
                         </motion.span>

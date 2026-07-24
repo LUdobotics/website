@@ -16,6 +16,7 @@ export interface Metric {
   label: string;
   description: string;
   suffix?: string;
+  sourceUrl?: string;
 }
 
 export interface RoadmapItem {

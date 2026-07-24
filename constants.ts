@@ -70,12 +70,14 @@ export const METRICS: Metric[] = [
     suffix: "%",
     label: "Fewer failing students",
     description: "More learners stay on track through active practice, immediate feedback, and timely teacher intervention.",
+    sourceUrl: "https://onlinelibrary.wiley.com/doi/10.1002/cae.70071",
   },
   {
     value: "3.3",
     suffix: "×",
     label: "More top-performing engineers",
     description: "High-potential learners have more room to practise, experiment, and demonstrate advanced mastery.",
+    sourceUrl: "https://onlinelibrary.wiley.com/doi/10.1002/cae.70071",
   },
   {
     value: "0",

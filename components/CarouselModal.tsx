@@ -4,13 +4,14 @@ import { X, ChevronLeft, ChevronRight } from 'lucide-react';
 import sneak1 from '../assets/sneak1.jpg';
 import sneak2 from '../assets/sneak2.jpg';
 import sneak3 from '../assets/sneak3.jpg';
+import heroImage from '../assets/hero_image.png';
 
 interface CarouselModalProps {
     isOpen: boolean;
     onClose: () => void;
 }
 
-const images = [sneak1, sneak2, sneak3];
+const images = [heroImage, sneak1, sneak2, sneak3];
 
 export const CarouselModal: React.FC<CarouselModalProps> = ({ isOpen, onClose }) => {
     const [currentIndex, setCurrentIndex] = useState(0);

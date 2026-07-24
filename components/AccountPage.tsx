@@ -38,8 +38,8 @@ const clerkAppearance = {
     colorBackground: '#020810',
     colorText: '#ffffff',
     colorTextSecondary: 'rgba(255, 255, 255, 0.82)',
-    colorInputBackground: 'rgba(10, 20, 40, 0.85)',
-    colorInputText: '#ffffff',
+    colorInputBackground: '#ffffff',
+    colorInputText: '#020810',
     borderRadius: '0.75rem',
     fontFamily: 'Space Grotesk, sans-serif',
   },
@@ -50,10 +50,22 @@ const clerkAppearance = {
     headerTitle: 'font-orbitron text-white',
     headerSubtitle: 'text-white/80',
     formFieldLabel: 'text-white/90',
+    formFieldInput: 'bg-white text-ludo-deep placeholder:text-slate-500',
+    navbarButton: 'text-white hover:text-ludo-cyan',
+    menuButton: 'text-white hover:text-ludo-cyan',
     formButtonPrimary: 'font-orbitron uppercase tracking-widest text-ludo-deep',
     footerActionText: 'text-white/70',
     footerActionLink: 'text-ludo-cyan',
     formFieldErrorText: 'text-ludo-orange',
+  },
+};
+
+const organizationSwitcherAppearance = {
+  ...clerkAppearance,
+  elements: {
+    ...clerkAppearance.elements,
+    rootBox: 'w-auto',
+    organizationSwitcherTrigger: 'w-auto',
   },
 };
 
@@ -75,7 +87,10 @@ export const AccountPage: React.FC<AccountPageProps> = ({ path, isClerkConfigure
   const routeLabel = getRouteLabel(path);
   const routeDescription = getRouteDescription(path);
   const isDashboardRoute = path.startsWith('/account/teacher/dashboard');
+  const isAccountManagementRoute = path.startsWith('/account/manage');
   const isManagementRoute = path.startsWith('/account/manage') || path.startsWith('/organization/manage') || isDashboardRoute;
+  const backHref = isAccountManagementRoute ? '/' : '/account/manage';
+  const backLabel = isAccountManagementRoute ? 'Back to Ludobotics' : 'Account management';
 
   return (
     <div className="min-h-screen bg-ludo-deep text-white selection:bg-ludo-cyan selection:text-ludo-deep">
@@ -87,11 +102,11 @@ export const AccountPage: React.FC<AccountPageProps> = ({ path, isClerkConfigure
         <div className="container mx-auto px-6 relative z-10 py-16 md:py-24">
           <div className={`${isDashboardRoute ? 'max-w-7xl' : 'max-w-5xl'} mx-auto`}>
             <a
-              href="/"
+              href={backHref}
               className="inline-flex items-center gap-2 text-ludo-muted hover:text-ludo-cyan transition-colors font-mono text-xs uppercase tracking-widest mb-10"
             >
               <ArrowLeft size={16} />
-              Back to Ludobotics
+              {backLabel}
             </a>
 
             <div className={isManagementRoute ? 'space-y-10' : 'grid grid-cols-1 lg:grid-cols-[0.85fr_1.15fr] gap-10 items-start'}>
@@ -366,7 +381,7 @@ const AccountManagement: React.FC = () => {
                 organizationProfileUrl="/account/manage"
                 organizationProfileMode="navigation"
                 afterSelectOrganizationUrl="/account/manage"
-                appearance={clerkAppearance}
+                appearance={organizationSwitcherAppearance}
               />
             )}
           </div>
@@ -406,20 +421,6 @@ const AccountManagement: React.FC = () => {
             description="Download the launcher used to install, update, and enter The Odyssey."
             href={launcherDownloadPath}
             action="Download client"
-          />
-          <AccountActionCard
-            eyebrow="Classroom access"
-            title={organization?.name ?? 'Select an organization'}
-            description={organization ? 'Manage members, student invitations, roles, and organization settings.' : 'Select or create the organization that will contain your classroom.'}
-            onClick={() => setActiveTab('organization')}
-            action="Manage classroom"
-          />
-          <AccountActionCard
-            eyebrow="Personal settings"
-            title="Profile and security"
-            description="Update your identity, email addresses, password, and connected accounts."
-            onClick={() => setActiveTab('profile')}
-            action="Open profile"
           />
         </div>
         <div className="mt-5"><SignOutPanel /></div>
@@ -537,7 +538,7 @@ const TeacherOrganizationSection: React.FC<{
               organizationProfileUrl="/account/manage"
               organizationProfileMode="navigation"
               afterSelectOrganizationUrl="/account/manage"
-              appearance={clerkAppearance}
+              appearance={organizationSwitcherAppearance}
             />
           </div>
         </div>
@@ -689,6 +690,29 @@ const ClerkTextOverrides: React.FC = () => (
       color: #020810 !important;
     }
 
+    .cl-formFieldInput:not([autocomplete="one-time-code"]):not([inputmode="numeric"]),
+    .cl-formFieldInput:not([autocomplete="one-time-code"]):not([inputmode="numeric"]):focus {
+      background: #ffffff !important;
+      color: #020810 !important;
+      -webkit-text-fill-color: #020810 !important;
+    }
+
+    .cl-formFieldInput:not([autocomplete="one-time-code"]):not([inputmode="numeric"])::placeholder {
+      color: #64748b !important;
+      -webkit-text-fill-color: #64748b !important;
+      opacity: 1 !important;
+    }
+
+    .clerk-account-surface [class*="formFieldInput"]:not([autocomplete="one-time-code"]),
+    .clerk-account-surface [class*="formFieldInput"]:not([autocomplete="one-time-code"]) *,
+    .clerk-account-surface [class*="tagInput"],
+    .clerk-account-surface [class*="tagInput"] *,
+    .clerk-account-surface [class*="TagInput"],
+    .clerk-account-surface [class*="TagInput"] * {
+      color: #020810 !important;
+      -webkit-text-fill-color: #020810 !important;
+    }
+
     .clerk-account-surface input[autocomplete="one-time-code"],
     .clerk-account-surface input[inputmode="numeric"] {
       color: transparent !important;
@@ -744,6 +768,38 @@ const ClerkTextOverrides: React.FC = () => (
     .clerk-account-surface .cl-profilePage .cl-headerTitle,
     .clerk-account-surface .cl-profileSectionTitleText {
       color: #ffffff !important;
+    }
+
+    .clerk-account-surface .cl-navbarButton,
+    .clerk-account-surface .cl-navbarButton *,
+    .clerk-account-surface .cl-menuButton,
+    .clerk-account-surface .cl-menuButton * {
+      color: rgba(255, 255, 255, 0.92) !important;
+      -webkit-text-fill-color: rgba(255, 255, 255, 0.92) !important;
+    }
+
+    .clerk-account-surface .cl-navbarButton:hover,
+    .clerk-account-surface .cl-navbarButton:hover *,
+    .clerk-account-surface .cl-menuButton:hover,
+    .clerk-account-surface .cl-menuButton:hover * {
+      color: #00ffff !important;
+      -webkit-text-fill-color: #00ffff !important;
+    }
+
+    .cl-organizationSwitcherPopoverCard,
+    .cl-organizationSwitcherPopoverCard p,
+    .cl-organizationSwitcherPopoverCard span,
+    .cl-organizationSwitcherPopoverCard button,
+    .cl-organizationSwitcherPopoverCard [class*="Identifier"],
+    .cl-organizationSwitcherPopoverCard [class*="ButtonText"] {
+      color: rgba(255, 255, 255, 0.92) !important;
+      -webkit-text-fill-color: rgba(255, 255, 255, 0.92) !important;
+    }
+
+    .cl-organizationSwitcherPopoverCard button:hover,
+    .cl-organizationSwitcherPopoverCard button:hover * {
+      color: #00ffff !important;
+      -webkit-text-fill-color: #00ffff !important;
     }
 
     .clerk-account-surface .cl-footerActionLink,

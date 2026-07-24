@@ -80,13 +80,13 @@ function useSimulatedClassroom(): { students: DashboardStudent[]; updateLabel: s
           commandsTotal: nextCommandsTotal,
           commandsSuccessful: nextSuccessful,
           commandAccuracy: Math.round((nextSuccessful / nextCommandsTotal) * 100),
-          score: Math.min(student.score + (successful ? 4 : 1), student.maxScore),
+          score: Math.min(student.score + (successful ? 1 : 0), student.maxScore),
           lastSeen: 'Now',
         };
       }));
 
       setUpdateLabel(`Snapshot ${String(tick.current + 1).padStart(2, '0')} · live demo`);
-    }, 2800);
+    }, 8000);
 
     return () => window.clearInterval(interval);
   }, []);

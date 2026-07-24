@@ -38,12 +38,36 @@ export const Impact: React.FC = () => {
               <div className="font-orbitron text-5xl font-black text-transparent bg-clip-text bg-gradient-to-br from-ludo-cyan via-ludo-blue to-ludo-magenta md:text-6xl">
                 {metric.value}
                 {metric.suffix && <span className="ml-1 text-2xl md:text-3xl">{metric.suffix}</span>}
+                {metric.sourceUrl && (
+                  <a
+                    href={metric.sourceUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    aria-label={`View the research source for ${metric.label}`}
+                    title="View referenced paper"
+                    className="ml-1 inline-block align-top text-base text-ludo-cyan transition-colors hover:text-white md:text-lg"
+                  >
+                    *
+                  </a>
+                )}
               </div>
               <h3 className="mt-4 font-grotesk text-base font-bold uppercase tracking-[0.1em] text-white">{metric.label}</h3>
               <p className="mx-auto mt-3 max-w-xs font-grotesk text-sm leading-relaxed text-ludo-muted">{metric.description}</p>
             </motion.article>
           ))}
         </div>
+
+        <p className="mt-4 text-center font-grotesk text-xs text-white/40">
+          * Findings referenced from a peer-reviewed study.{' '}
+          <a
+            href="https://onlinelibrary.wiley.com/doi/10.1002/cae.70071"
+            target="_blank"
+            rel="noreferrer"
+            className="text-ludo-cyan underline decoration-ludo-cyan/35 underline-offset-4 transition-colors hover:text-white"
+          >
+            Read the paper
+          </a>
+        </p>
 
         <motion.div
           initial={{ opacity: 0, y: 26 }}
