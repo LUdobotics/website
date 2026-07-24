@@ -94,9 +94,12 @@ For student invitations, use Clerk's organization invitation flow from `/account
 
 `https://ludobotics.com/account/student/invitation`
 
-The student invitation and student sign-in pages force the final redirect to:
+Legacy Clerk invitations may still contain the former launcher redirect:
 
 `https://ludobotics.com/launcher_download_client`
+
+The application detects `__clerk_ticket` before Clerk initializes and rewrites
+any such legacy redirect to the guarded student invitation route.
 
 Use a `pk_test_...` key for local development and a `pk_live_...` key for production.
 

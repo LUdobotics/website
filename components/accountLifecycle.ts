@@ -41,6 +41,23 @@ export const getStudentInvitationState = (search: string): StudentInvitationStat
   return { kind: status, ticket };
 };
 
+export const getCanonicalStudentInvitationUrl = (
+  pathname: string,
+  search: string,
+) => {
+  const params = new URLSearchParams(search);
+
+  if (
+    !params.has('__clerk_ticket')
+    || pathname === '/account/student/invitation'
+    || pathname.startsWith('/account/student/invitation/')
+  ) {
+    return null;
+  }
+
+  return `/account/student/invitation${search.startsWith('?') ? search : `?${search}`}`;
+};
+
 export const isInvitationOnboarding = (search: string) => (
   new URLSearchParams(search).get('source') === 'invitation'
 );

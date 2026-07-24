@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   formatMembershipRole,
+  getCanonicalStudentInvitationUrl,
   getStudentInvitationState,
   isInvitationOnboarding,
   isStudentMembershipRole,
@@ -29,6 +30,33 @@ describe('student invitation routing', () => {
       kind: 'invalid_status',
       status: 'expired',
     });
+  });
+
+  it.each([
+    '/launcher_download_client',
+    '/',
+    '/account/sign-in',
+  ])('moves a ticket from %s to the guarded invitation route', pathname => {
+    const search = '?__clerk_ticket=ticket_123&__clerk_status=sign_in';
+
+    expect(getCanonicalStudentInvitationUrl(pathname, search)).toBe(
+      `/account/student/invitation${search}`,
+    );
+  });
+
+  it('does not rewrite the guarded invitation route again', () => {
+    expect(
+      getCanonicalStudentInvitationUrl(
+        '/account/student/invitation',
+        '?__clerk_ticket=ticket_123&__clerk_status=sign_in',
+      ),
+    ).toBeNull();
+  });
+
+  it('does not rewrite ordinary launcher navigation', () => {
+    expect(
+      getCanonicalStudentInvitationUrl('/launcher_download_client', ''),
+    ).toBeNull();
   });
 
   it('marks invitation redirects separately from ordinary student sign-in', () => {
