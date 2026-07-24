@@ -33,7 +33,7 @@ function App({ isClerkConfigured }: AppProps) {
   const closeSneakPeek = () => setIsSneakPeekOpen(false);
 
   if (path === '/launcher_download_student' || path === '/launcher_download_client') {
-    return <LauncherDownloadStudent />;
+    return <LauncherDownloadStudent isClerkConfigured={isClerkConfigured} />;
   }
 
   if (isAccountPath(path) || isOrganizationPath(path)) {

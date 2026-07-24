@@ -1,7 +1,9 @@
 import React from 'react';
+import { RedirectToSignIn, useUser } from '@clerk/react';
 import { motion } from 'framer-motion';
 import { AlertTriangle, ArrowLeft, CheckCircle2, Download, FileCode2, Terminal } from 'lucide-react';
 import { Section } from './ui/Section';
+import { isStudentMembershipRole, isTeacherMembershipRole } from './accountLifecycle';
 
 const downloadUrl = 'https://dl.patchkit.net/d/21plmqaazwhzt3484oibu/direct';
 
@@ -23,7 +25,61 @@ const steps = [
   },
 ];
 
-export const LauncherDownloadStudent: React.FC = () => {
+export const LauncherDownloadStudent: React.FC<{ isClerkConfigured: boolean }> = ({ isClerkConfigured }) => {
+  if (!isClerkConfigured) {
+    return <LauncherAccessMessage title="Account service unavailable" description="Clerk must be configured before the launcher download can be accessed." />;
+  }
+
+  return <ProtectedLauncherDownload />;
+};
+
+const ProtectedLauncherDownload: React.FC = () => {
+  const { isLoaded, isSignedIn, user } = useUser();
+
+  if (!isLoaded) {
+    return <LauncherAccessMessage title="Checking account access" description="Verifying your organization membership…" loading />;
+  }
+
+  if (!isSignedIn || !user) {
+    return <RedirectToSignIn redirectUrl="/launcher_download_client" />;
+  }
+
+  const canDownload = user.organizationMemberships.some(item => (
+    isStudentMembershipRole(item.role) || isTeacherMembershipRole(item.role)
+  ));
+
+  if (!canDownload) {
+    return (
+      <LauncherAccessMessage
+        title="Organization membership required"
+        description="The launcher is available after a teacher account creates a classroom or a student accepts a valid invitation."
+        actionHref="/account/manage"
+        actionLabel="Open account management"
+      />
+    );
+  }
+
+  return <LauncherDownloadContent />;
+};
+
+const LauncherAccessMessage: React.FC<{
+  title: string;
+  description: string;
+  loading?: boolean;
+  actionHref?: string;
+  actionLabel?: string;
+}> = ({ title, description, loading = false, actionHref, actionLabel }) => (
+  <div className="flex min-h-screen items-center justify-center bg-ludo-deep px-6 text-white">
+    <div className="w-full max-w-xl rounded-2xl border border-ludo-cyan/25 bg-ludo-panel p-8 text-center">
+      {loading ? <div className="mx-auto mb-5 h-9 w-9 animate-spin rounded-full border-2 border-ludo-cyan border-t-transparent" /> : <AlertTriangle size={32} className="mx-auto mb-5 text-ludo-orange" />}
+      <h1 className="font-orbitron text-2xl font-bold">{title}</h1>
+      <p className="mt-3 font-grotesk leading-relaxed text-white/60">{description}</p>
+      {actionHref && actionLabel && <a href={actionHref} className="mt-6 inline-flex border border-ludo-cyan px-5 py-3 font-orbitron text-xs uppercase tracking-widest text-ludo-cyan hover:bg-ludo-cyan hover:text-ludo-deep">{actionLabel}</a>}
+    </div>
+  </div>
+);
+
+const LauncherDownloadContent: React.FC = () => {
   return (
     <div className="min-h-screen bg-ludo-deep text-white selection:bg-ludo-cyan selection:text-ludo-deep">
       <Section className="min-h-screen flex items-center relative" noPadding>

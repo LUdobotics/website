@@ -9,12 +9,9 @@ import {
   OdysseyTeacherDashboardResponse,
 } from './teacher-dashboard/dashboardData';
 import { odysseyBackendUrl } from './odysseyProfile';
+import { isTeacherMembershipRole } from './accountLifecycle';
 
 const backendUrl = odysseyBackendUrl;
-
-const isTeacherRole = (role?: string | null) => (
-  role === 'org:admin_teacher' || role === 'admin_teacher' || role === 'org:admin' || role === 'org:teacher'
-);
 
 export const TeacherDashboardPage: React.FC = () => {
   const { getToken, isLoaded: isAuthLoaded, isSignedIn, orgId } = useAuth();
@@ -23,7 +20,7 @@ export const TeacherDashboardPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
-  const teacher = isTeacherRole(membership?.role);
+  const teacher = isTeacherMembershipRole(membership?.role);
 
   const loadDashboard = useCallback(async (quiet = false) => {
     if (!backendUrl || !isSignedIn || !orgId || !teacher) return;

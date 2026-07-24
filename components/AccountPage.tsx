@@ -21,6 +21,12 @@ import {
   OdysseyProfileUser,
   syncOdysseyProfile,
 } from './odysseyProfile';
+import {
+  formatMembershipRole,
+  isStudentMembershipRole,
+  isTeacherMembershipRole,
+} from './accountLifecycle';
+import { StudentInvitationFlow, StudentOnboarding } from './StudentAccountOnboarding';
 
 interface AccountPageProps {
   path: string;
@@ -28,6 +34,7 @@ interface AccountPageProps {
 }
 
 const launcherDownloadPath = '/launcher_download_client';
+const studentOnboardingPath = '/account/student/onboarding';
 
 export const isAccountPath = (path: string) => path === '/account' || path.startsWith('/account/');
 export const isOrganizationPath = (path: string) => path === '/organization' || path.startsWith('/organization/');
@@ -75,6 +82,7 @@ const routeLabels: Record<string, string> = {
   '/account/teacher/sign-up': 'Teacher onboarding',
   '/account/teacher/dashboard': 'Classroom intelligence',
   '/account/student/invitation': 'Student invitation',
+  '/account/student/onboarding': 'Student account readiness',
   '/account/student/sign-in': 'Student sign in',
   '/account/sign-in': 'Sign in',
   '/account/manage': 'Manage account',
@@ -158,13 +166,17 @@ const ClerkAccountSurface: React.FC<{ path: string }> = ({ path }) => {
         routing="path"
         path={isStudentSignIn ? '/account/student/sign-in' : '/account/sign-in'}
         signUpUrl={isStudentSignIn ? '/account/student/invitation' : '/account/teacher/sign-up'}
-        forceRedirectUrl={isStudentSignIn ? launcherDownloadPath : undefined}
-        fallbackRedirectUrl={isStudentSignIn ? launcherDownloadPath : '/account/manage'}
-        signUpForceRedirectUrl={isStudentSignIn ? launcherDownloadPath : undefined}
-        signUpFallbackRedirectUrl={isStudentSignIn ? launcherDownloadPath : undefined}
+        forceRedirectUrl={isStudentSignIn ? studentOnboardingPath : undefined}
+        fallbackRedirectUrl={isStudentSignIn ? studentOnboardingPath : '/account/manage'}
+        signUpForceRedirectUrl={isStudentSignIn ? studentOnboardingPath : undefined}
+        signUpFallbackRedirectUrl={isStudentSignIn ? studentOnboardingPath : undefined}
         appearance={clerkAppearance}
       />
     );
+  }
+
+  if (path.startsWith(studentOnboardingPath)) {
+    return <StudentOnboarding />;
   }
 
   if (path.startsWith('/account/manage')) {
@@ -184,18 +196,7 @@ const ClerkAccountSurface: React.FC<{ path: string }> = ({ path }) => {
   }
 
   if (path.startsWith('/account/student/invitation')) {
-    return (
-      <SignUp
-        routing="path"
-        path="/account/student/invitation"
-        signInUrl="/account/student/sign-in"
-        forceRedirectUrl={launcherDownloadPath}
-        fallbackRedirectUrl={launcherDownloadPath}
-        signInForceRedirectUrl={launcherDownloadPath}
-        signInFallbackRedirectUrl={launcherDownloadPath}
-        appearance={clerkAppearance}
-      />
-    );
+    return <StudentInvitationFlow />;
   }
 
   return (
@@ -480,14 +481,33 @@ const AccountActionCard: React.FC<{
 };
 
 const ProtectedOrganizationCreate: React.FC = () => {
-  const { isLoaded, isSignedIn } = useUser();
+  const { isLoaded, isSignedIn, user } = useUser();
 
   if (!isLoaded) {
     return <AccountLoading label="Loading teacher onboarding" />;
   }
 
-  if (!isSignedIn) {
+  if (!isSignedIn || !user) {
     return <RedirectToSignIn />;
+  }
+
+  const memberships = user.organizationMemberships;
+  const mayCreateOrganization = memberships.length === 0
+    || memberships.some(item => isTeacherMembershipRole(item.role));
+
+  if (!mayCreateOrganization) {
+    return (
+      <div className="w-full max-w-xl rounded-2xl border border-ludo-orange/35 bg-ludo-panel p-7">
+        <AlertTriangle size={32} className="text-ludo-orange" />
+        <h2 className="mt-5 font-orbitron text-2xl font-bold text-white">Teacher access required</h2>
+        <p className="mt-3 font-grotesk text-sm leading-relaxed text-white/65">
+          Student-only accounts cannot create classroom organizations. Ask a teacher administrator if your role is incorrect.
+        </p>
+        <a href="/account/manage" className="mt-6 inline-flex border border-ludo-cyan px-5 py-3 font-orbitron text-xs uppercase tracking-widest text-ludo-cyan hover:bg-ludo-cyan hover:text-ludo-deep">
+          Return to account
+        </a>
+      </div>
+    );
   }
 
   return (
@@ -604,7 +624,7 @@ const LauncherDownloadPanel: React.FC = () => (
 );
 
 const OrganizationMemberSummary: React.FC<{ organizationName: string; role?: string | null }> = ({ organizationName, role }) => {
-  const isStudent = role === 'org:student' || role === 'student';
+  const isStudent = isStudentMembershipRole(role);
 
   return (
   <div className="w-full bg-ludo-panel border border-ludo-cyan/30 rounded-xl p-8">
@@ -857,24 +877,4 @@ const getRouteDescription = (path: string) => {
   }
 
   return 'Account creation, organization management, and student invitation flows are powered by Clerk.';
-};
-
-const isTeacherMembershipRole = (role?: string | null) => {
-  if (!role) {
-    return false;
-  }
-
-  return role === 'org:admin_teacher' || role === 'admin_teacher';
-};
-
-const formatMembershipRole = (role: string) => {
-  if (role === 'org:admin_teacher' || role === 'admin_teacher') {
-    return 'Teacher';
-  }
-
-  if (role === 'org:student' || role === 'student') {
-    return 'Student';
-  }
-
-  return role.replace(/^org:/, '');
 };
