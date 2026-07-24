@@ -28,6 +28,32 @@ const benefits = [
   },
 ];
 
+const demoChapterOneSteps = {
+  c1_s01: { id: 'c1_s01', label: 'Exterior', progress: 6 },
+  c1_s02: { id: 'c1_s02', label: 'Entry Door', progress: 13 },
+  c1_s03: { id: 'c1_s03', label: 'Entering Spaceship', progress: 21 },
+  c1_s04: { id: 'c1_s04', label: 'Second door', progress: 29 },
+  c1_s05: { id: 'c1_s05', label: 'Going to the Deck', progress: 38 },
+  c1_s06: { id: 'c1_s06', label: 'ARGOS Mission brief', progress: 47 },
+  c1_s07: { id: 'c1_s07', label: 'Battery Room', progress: 59 },
+  c1_s08: { id: 'c1_s08', label: 'Engine Room', progress: 59 },
+  c1_s09: { id: 'c1_s09', label: 'Server Maze Reach Button', progress: 77 },
+  c1_s10: { id: 'c1_s10', label: 'System Reboot Signal', progress: 94 },
+} as const;
+
+type DemoCheckpointId = keyof typeof demoChapterOneSteps;
+
+function nextDemoCheckpoint(student: DashboardStudent) {
+  const branch = student.id === 'leo' || student.id === 'noah' ? 'c1_s08' : 'c1_s07';
+  const nextByCheckpoint: Record<DemoCheckpointId, DemoCheckpointId> = {
+    c1_s01: 'c1_s02', c1_s02: 'c1_s03', c1_s03: 'c1_s04', c1_s04: 'c1_s05',
+    c1_s05: 'c1_s06', c1_s06: branch, c1_s07: 'c1_s09', c1_s08: 'c1_s09',
+    c1_s09: 'c1_s10', c1_s10: 'c1_s10',
+  };
+  const currentId = student.checkpointId as DemoCheckpointId;
+  return demoChapterOneSteps[nextByCheckpoint[currentId] ?? 'c1_s01'];
+}
+
 function useSimulatedClassroom(): { students: DashboardStudent[]; updateLabel: string } {
   const [students, setStudents] = useState(demoStudents);
   const [updateLabel, setUpdateLabel] = useState('Simulation running');
@@ -36,22 +62,25 @@ function useSimulatedClassroom(): { students: DashboardStudent[]; updateLabel: s
   useEffect(() => {
     const interval = window.setInterval(() => {
       tick.current += 1;
-      const targetIndex = tick.current % 3;
+      const targetIndex = tick.current % demoStudents.length;
 
       setStudents(previous => previous.map((student, index) => {
         if (index !== targetIndex) return student;
-        const progressGain = index === 1 ? 1 : 2;
-        const nextProgress = Math.min(student.progress + progressGain, 96);
+        const nextCheckpoint = nextDemoCheckpoint(student);
+        const nextProgress = Math.max(student.progress + 2, nextCheckpoint.progress);
         const nextCommandsTotal = student.commandsTotal + 1;
         const successful = index !== 1 || tick.current % 3 !== 0;
         const nextSuccessful = student.commandsSuccessful + (successful ? 1 : 0);
         return {
           ...student,
-          progress: nextProgress,
+          checkpointId: nextCheckpoint.id,
+          checkpoint: nextCheckpoint.label,
+          state: 'Working on ' + nextCheckpoint.label,
+          progress: Math.min(nextProgress, 96),
           commandsTotal: nextCommandsTotal,
           commandsSuccessful: nextSuccessful,
           commandAccuracy: Math.round((nextSuccessful / nextCommandsTotal) * 100),
-          score: Math.min(student.score + (successful ? 8 : 2), student.maxScore),
+          score: Math.min(student.score + (successful ? 4 : 1), student.maxScore),
           lastSeen: 'Now',
         };
       }));
@@ -79,7 +108,7 @@ export const TeacherBenefits: React.FC = () => {
           <div className="mb-4 inline-flex items-center gap-2 font-mono text-sm uppercase tracking-widest text-ludo-cyan">
             <Sparkles size={15} /> Built for educators
           </div>
-          <h2 className="font-orbitron text-3xl font-bold text-white md:text-5xl">
+          <h2 className="font-orbitron text-3xl font-bold text-white md:text-4xl">
             Teach robotics. <span className="text-transparent bg-clip-text bg-gradient-to-r from-ludo-cyan to-ludo-blue">See understanding happen.</span>
           </h2>
           <p className="mx-auto mt-6 max-w-2xl font-grotesk text-lg leading-relaxed text-white/60">
@@ -87,7 +116,7 @@ export const TeacherBenefits: React.FC = () => {
           </p>
         </div>
 
-        <div className="mt-14 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-14 grid grid-cols-1 gap-6 md:grid-cols-2 md:gap-8">
           {benefits.map((benefit, index) => (
             <motion.article
               key={benefit.title}
@@ -95,13 +124,13 @@ export const TeacherBenefits: React.FC = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: '-80px' }}
               transition={{ delay: index * 0.08 }}
-              className="rounded-2xl border border-ludo-border/30 bg-ludo-panel p-6 transition-colors hover:border-ludo-cyan/60"
+              className="rounded-2xl border border-ludo-border/30 bg-ludo-panel p-8 transition-colors hover:border-ludo-cyan/60"
             >
-              <div className="mb-5 flex h-11 w-11 items-center justify-center rounded-xl border border-ludo-cyan/25 bg-ludo-cyan/10">
-                <benefit.icon size={21} className="text-ludo-cyan" />
+              <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-xl border border-ludo-cyan/25 bg-ludo-cyan/10">
+                <benefit.icon size={24} className="text-ludo-cyan" />
               </div>
-              <h3 className="font-orbitron text-base font-bold text-white">{benefit.title}</h3>
-              <p className="mt-3 font-grotesk text-sm leading-relaxed text-white/55">{benefit.description}</p>
+              <h3 className="font-orbitron text-xl font-bold text-white">{benefit.title}</h3>
+              <p className="mt-3 font-grotesk leading-relaxed text-white/55">{benefit.description}</p>
             </motion.article>
           ))}
         </div>

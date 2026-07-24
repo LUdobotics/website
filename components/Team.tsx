@@ -6,7 +6,7 @@ import { Section } from './ui/Section';
 const team = [
   {
     name: 'Dr. Loïck Chovet',
-    role: 'CEO/CTO and Founder of Ludobotics',
+    role: 'CEO/CTO and Co-Founder',
     initials: 'LC',
     icon: Rocket,
     accent: 'from-ludo-cyan/30 via-ludo-blue/15 to-transparent',
@@ -14,7 +14,7 @@ const team = [
   },
   {
     name: 'Rishekesh Ramesh',
-    role: 'COO and Founder',
+    role: 'COO and Co-Founder',
     initials: 'RR',
     icon: BriefcaseBusiness,
     accent: 'from-ludo-blue/35 via-ludo-magenta/10 to-transparent',
@@ -22,7 +22,7 @@ const team = [
   },
   {
     name: 'Prof. Dr. Miguel Olivares Mendez',
-    role: 'Founder',
+    role: 'Chief Roboticist and Co-Founder',
     initials: 'MM',
     icon: Users,
     accent: 'from-ludo-magenta/25 via-ludo-blue/15 to-transparent',
@@ -30,7 +30,7 @@ const team = [
   },
   {
     name: 'Dr. Dave van der Meer',
-    role: 'ROS2 technical expert',
+    role: 'Game Robotic Engineer',
     initials: 'DM',
     icon: Braces,
     accent: 'from-ludo-green/25 via-ludo-cyan/10 to-transparent',

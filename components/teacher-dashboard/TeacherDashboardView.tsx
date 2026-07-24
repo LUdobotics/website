@@ -36,7 +36,7 @@ export const TeacherDashboardView: React.FC<TeacherDashboardViewProps> = ({
   hideMissionProgress = false,
 }) => {
   const [filter, setFilter] = useState<StudentFilter>('all');
-  const [selectedChapter, setSelectedChapter] = useState('Ch2');
+  const [selectedChapter, setSelectedChapter] = useState('Ch1');
   const [expandedStudentId, setExpandedStudentId] = useState<string | null>(students[1]?.id ?? null);
 
   const filteredStudents = useMemo(
@@ -192,18 +192,29 @@ export const TeacherDashboardView: React.FC<TeacherDashboardViewProps> = ({
                         <span className="min-w-0">
                           <span className="block truncate font-grotesk text-xs font-semibold text-white">{student.name}</span>
                           <span className="block truncate font-grotesk text-[10px] text-white/40">{student.checkpoint}</span>
+                          <span className="mt-2 block sm:hidden">
+                            <span className="mb-1 flex justify-between font-mono text-[9px] font-bold text-ludo-cyan"><span>Progress</span><span>{student.progress}%</span></span>
+                            <span className="block h-2 overflow-hidden rounded-full bg-white/10">
+                              <motion.span className="block h-full rounded-full bg-gradient-to-r from-ludo-blue to-ludo-cyan shadow-[0_0_10px_rgba(0,255,255,0.35)]" animate={{ width: `${student.progress}%` }} transition={{ duration: 0.9, ease: 'easeOut' }} />
+                            </span>
+                          </span>
                         </span>
                       </span>
                       <span className={`justify-self-start rounded-full border px-2 py-1 font-mono text-[8px] uppercase ${status.className}`}>
                         <span className={`mr-1 inline-block h-1.5 w-1.5 rounded-full ${status.dot}`} />{status.label}
                       </span>
                       <span className="hidden min-w-0 sm:block">
-                        <span className="mb-1 flex justify-between font-mono text-[9px] text-white/45"><span>{student.chapter}</span><span>{student.progress}%</span></span>
-                        <span className="block h-1.5 overflow-hidden rounded-full bg-white/10">
-                          <motion.span className="block h-full rounded-full bg-gradient-to-r from-ludo-blue to-ludo-cyan" animate={{ width: `${student.progress}%` }} transition={{ duration: 0.9, ease: 'easeOut' }} />
+                        <span className="mb-1.5 flex justify-between font-mono text-[9px] font-bold text-white/50"><span>{student.chapter}</span><span className="text-ludo-cyan">{student.progress}%</span></span>
+                        <span className="block h-2.5 overflow-hidden rounded-full border border-ludo-cyan/10 bg-white/10">
+                          <motion.span className="block h-full rounded-full bg-gradient-to-r from-ludo-blue to-ludo-cyan shadow-[0_0_10px_rgba(0,255,255,0.35)]" animate={{ width: `${student.progress}%` }} transition={{ duration: 0.9, ease: 'easeOut' }} />
                         </span>
                       </span>
-                      <span className="hidden text-right font-mono text-[9px] text-white/40 sm:block">{student.lastSeen}</span>
+                      <span className="hidden text-right sm:block">
+                        <motion.span key={student.score} initial={{ opacity: 0.35, y: 3 }} animate={{ opacity: 1, y: 0 }} className="block font-orbitron text-xs font-bold text-ludo-cyan">
+                          {student.score}/{student.maxScore || 100}
+                        </motion.span>
+                        <span className="mt-1 block font-mono text-[8px] uppercase tracking-wider text-white/35">Score · {student.lastSeen}</span>
+                      </span>
                     </button>
 
                     <AnimatePresence initial={false}>
