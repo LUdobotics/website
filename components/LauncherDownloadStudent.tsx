@@ -44,9 +44,9 @@ const ProtectedLauncherDownload: React.FC = () => {
     return <RedirectToSignIn redirectUrl="/launcher_download_client" />;
   }
 
-  const canDownload = user.organizationMemberships.some(item => (
-    isStudentMembershipRole(item.role) || isTeacherMembershipRole(item.role)
-  ));
+  const hasStudentMembership = user.organizationMemberships.some(item => isStudentMembershipRole(item.role));
+  const hasTeacherMembership = user.organizationMemberships.some(item => isTeacherMembershipRole(item.role));
+  const canDownload = hasStudentMembership || hasTeacherMembership;
 
   if (!canDownload) {
     return (
@@ -55,6 +55,17 @@ const ProtectedLauncherDownload: React.FC = () => {
         description="The launcher is available after a teacher account creates a classroom or a student accepts a valid invitation."
         actionHref="/account/manage"
         actionLabel="Open account management"
+      />
+    );
+  }
+
+  if (hasStudentMembership && !user.passwordEnabled) {
+    return (
+      <LauncherAccessMessage
+        title="Create a launcher password"
+        description="Your student membership is active, but this account does not have the password required by the launcher yet."
+        actionHref="/account/student/onboarding"
+        actionLabel="Finish account setup"
       />
     );
   }
