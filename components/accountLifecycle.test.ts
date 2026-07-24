@@ -2,8 +2,10 @@ import { describe, expect, it } from 'vitest';
 import {
   formatMembershipRole,
   getStudentInvitationState,
+  isInvitationOnboarding,
   isStudentMembershipRole,
   isTeacherMembershipRole,
+  shouldExitActiveSessionForInvitation,
 } from './accountLifecycle';
 
 describe('student invitation routing', () => {
@@ -27,6 +29,39 @@ describe('student invitation routing', () => {
       kind: 'invalid_status',
       status: 'expired',
     });
+  });
+
+  it('marks invitation redirects separately from ordinary student sign-in', () => {
+    expect(isInvitationOnboarding('?source=invitation')).toBe(true);
+    expect(isInvitationOnboarding('')).toBe(false);
+    expect(isInvitationOnboarding('?source=sign-in')).toBe(false);
+  });
+
+  it.each(['sign_in', 'sign_up', 'complete'] as const)(
+    'requires an active session to exit before processing %s',
+    kind => {
+      const invitation = getStudentInvitationState(
+        `?__clerk_ticket=ticket_123&__clerk_status=${kind}`,
+      );
+
+      expect(shouldExitActiveSessionForInvitation(invitation, true)).toBe(true);
+      expect(shouldExitActiveSessionForInvitation(invitation, false)).toBe(false);
+    },
+  );
+
+  it('does not sign out users for malformed invitation URLs', () => {
+    expect(
+      shouldExitActiveSessionForInvitation(
+        getStudentInvitationState(''),
+        true,
+      ),
+    ).toBe(false);
+    expect(
+      shouldExitActiveSessionForInvitation(
+        getStudentInvitationState('?__clerk_ticket=ticket_123'),
+        true,
+      ),
+    ).toBe(false);
   });
 });
 

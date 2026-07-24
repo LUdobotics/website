@@ -41,6 +41,17 @@ export const getStudentInvitationState = (search: string): StudentInvitationStat
   return { kind: status, ticket };
 };
 
+export const isInvitationOnboarding = (search: string) => (
+  new URLSearchParams(search).get('source') === 'invitation'
+);
+
+export const shouldExitActiveSessionForInvitation = (
+  invitation: StudentInvitationState,
+  isSignedIn: boolean,
+) => (
+  isSignedIn && invitation.kind !== 'missing_ticket' && invitation.kind !== 'invalid_status'
+);
+
 export const formatMembershipRole = (role: string) => {
   if (isTeacherMembershipRole(role)) {
     return 'Teacher';

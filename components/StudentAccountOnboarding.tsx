@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   RedirectToSignIn,
   SignIn,
+  SignOutButton,
   SignUp,
   useAuth,
   useOrganization,
@@ -11,11 +12,14 @@ import {
 import { AlertTriangle, CheckCircle2, KeyRound, RefreshCw, ShieldCheck } from 'lucide-react';
 import {
   getStudentInvitationState,
+  isInvitationOnboarding,
   isStudentMembershipRole,
+  shouldExitActiveSessionForInvitation,
 } from './accountLifecycle';
 import { odysseyBackendUrl, syncOdysseyProfile } from './odysseyProfile';
 
 const onboardingPath = '/account/student/onboarding';
+const invitationOnboardingPath = `${onboardingPath}?source=invitation`;
 const invitationPath = '/account/student/invitation';
 
 const appearance = {
@@ -46,6 +50,7 @@ const appearance = {
 
 export const StudentInvitationFlow: React.FC = () => {
   const invitation = getStudentInvitationState(window.location.search);
+  const { isLoaded, isSignedIn, user } = useUser();
 
   if (invitation.kind === 'missing_ticket') {
     return (
@@ -69,8 +74,32 @@ export const StudentInvitationFlow: React.FC = () => {
     );
   }
 
+  if (!isLoaded) {
+    return <OnboardingLoading label="Checking the active account" />;
+  }
+
+  if (shouldExitActiveSessionForInvitation(invitation, Boolean(isSignedIn))) {
+    const currentEmail = user?.primaryEmailAddress?.emailAddress ?? 'the current account';
+    const returnUrl = `${window.location.pathname}${window.location.search}`;
+
+    return (
+      <ActiveSessionInvitationGate
+        currentEmail={currentEmail}
+        returnUrl={returnUrl}
+      />
+    );
+  }
+
   if (invitation.kind === 'complete') {
-    return <StudentOnboarding />;
+    return (
+      <OnboardingMessage
+        tone="warning"
+        title="This invitation has already been processed"
+        description="Sign in with the account that received and accepted this invitation. This link will not attach a different active account to the classroom."
+        actionHref="/account/student/sign-in"
+        actionLabel="Sign in with the invited account"
+      />
+    );
   }
 
   if (invitation.kind === 'sign_in') {
@@ -79,10 +108,10 @@ export const StudentInvitationFlow: React.FC = () => {
         routing="path"
         path={invitationPath}
         signUpUrl={invitationPath}
-        forceRedirectUrl={onboardingPath}
-        fallbackRedirectUrl={onboardingPath}
-        signUpForceRedirectUrl={onboardingPath}
-        signUpFallbackRedirectUrl={onboardingPath}
+        forceRedirectUrl={invitationOnboardingPath}
+        fallbackRedirectUrl={invitationOnboardingPath}
+        signUpForceRedirectUrl={invitationOnboardingPath}
+        signUpFallbackRedirectUrl={invitationOnboardingPath}
         appearance={appearance}
       />
     );
@@ -93,10 +122,10 @@ export const StudentInvitationFlow: React.FC = () => {
       routing="path"
       path={invitationPath}
       signInUrl={invitationPath}
-      forceRedirectUrl={onboardingPath}
-      fallbackRedirectUrl={onboardingPath}
-      signInForceRedirectUrl={onboardingPath}
-      signInFallbackRedirectUrl={onboardingPath}
+      forceRedirectUrl={invitationOnboardingPath}
+      fallbackRedirectUrl={invitationOnboardingPath}
+      signInForceRedirectUrl={invitationOnboardingPath}
+      signInFallbackRedirectUrl={invitationOnboardingPath}
       appearance={appearance}
     />
   );
@@ -105,6 +134,7 @@ export const StudentInvitationFlow: React.FC = () => {
 type ReadinessState = 'waiting' | 'syncing' | 'ready' | 'error';
 
 export const StudentOnboarding: React.FC = () => {
+  const invitationBound = isInvitationOnboarding(window.location.search);
   const { getToken } = useAuth();
   const { isLoaded: isUserLoaded, isSignedIn, user } = useUser();
   const {
@@ -143,7 +173,8 @@ export const StudentOnboarding: React.FC = () => {
 
   useEffect(() => {
     if (
-      !isMembershipsLoaded
+      invitationBound
+      || !isMembershipsLoaded
       || !isOrganizationLoaded
       || studentMemberships.length !== 1
       || organization?.id === studentMemberships[0].organization.id
@@ -154,6 +185,7 @@ export const StudentOnboarding: React.FC = () => {
     void activateOrganization(studentMemberships[0].organization.id);
   }, [
     activateOrganization,
+    invitationBound,
     isMembershipsLoaded,
     isOrganizationLoaded,
     organization?.id,
@@ -221,6 +253,18 @@ export const StudentOnboarding: React.FC = () => {
         description="Your account exists, but the student organization membership is not available yet. Reopen the newest invitation link or ask your teacher to resend it."
         actionHref={window.location.href}
         actionLabel="Check again"
+      />
+    );
+  }
+
+  if (invitationBound && !activeStudentMembership) {
+    return (
+      <OnboardingMessage
+        tone="warning"
+        title="Invited classroom not confirmed"
+        description="The invitation did not activate a student classroom for this account. For safety, another existing organization will not be selected automatically. Sign out and reopen the newest invitation."
+        actionHref="/account/student/sign-in"
+        actionLabel="Return to student sign in"
       />
     );
   }
@@ -382,6 +426,35 @@ const PasswordSetup: React.FC<{
     </form>
   );
 };
+
+const ActiveSessionInvitationGate: React.FC<{
+  currentEmail: string;
+  returnUrl: string;
+}> = ({ currentEmail, returnUrl }) => (
+  <div className="w-full max-w-xl rounded-2xl border border-ludo-orange/40 bg-ludo-panel p-7">
+    <AlertTriangle size={34} className="text-ludo-orange" />
+    <span className="mt-5 block font-mono text-[10px] uppercase tracking-[0.2em] text-ludo-orange">
+      Account confirmation required
+    </span>
+    <h2 className="mt-3 font-orbitron text-2xl font-bold text-white">Sign out before accepting this invitation</h2>
+    <p className="mt-3 font-grotesk text-sm leading-relaxed text-white/65">
+      You are currently signed in as <strong className="text-white">{currentEmail}</strong>. The invitation may belong to a different email address, so it will not be processed in this session.
+    </p>
+    <p className="mt-3 font-grotesk text-sm leading-relaxed text-white/55">
+      Signing out preserves this invitation link. Clerk will then sign in or create only the account associated with its ticket.
+    </p>
+    <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+      <SignOutButton redirectUrl={returnUrl}>
+        <button type="button" className="inline-flex items-center justify-center rounded-lg bg-ludo-cyan px-5 py-3 font-orbitron text-xs font-bold uppercase tracking-widest text-ludo-deep hover:bg-white">
+          Sign out and continue
+        </button>
+      </SignOutButton>
+      <a href="/account/manage" className="inline-flex items-center justify-center rounded-lg border border-white/15 px-5 py-3 font-orbitron text-xs uppercase tracking-widest text-white/65 hover:border-ludo-cyan/40 hover:text-ludo-cyan">
+        Cancel invitation
+      </a>
+    </div>
+  </div>
+);
 
 const ReadinessItem: React.FC<{ label: string }> = ({ label }) => (
   <li className="flex items-center gap-3">

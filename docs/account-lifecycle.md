@@ -9,17 +9,23 @@ the user profile consumed by the launcher.
 1. A teacher sends a Clerk organization invitation with the fixed student role.
 2. Clerk redirects to `/account/student/invitation` with `__clerk_ticket` and
    `__clerk_status`.
-3. The website renders the matching Clerk task:
+3. If any Clerk session is already active, the website displays its email and
+   requires the user to sign out before processing the ticket. The complete
+   invitation URL is preserved through sign-out.
+4. The website renders the matching Clerk task:
    - `sign_up`: create a new Clerk user and accept the membership.
    - `sign_in`: authenticate the existing Clerk user and accept the membership.
-   - `complete`: continue with the signed-in user.
-4. `/account/student/onboarding` checks for a student membership and activates
-   the relevant organization.
-5. If the user has no password (for example, an existing passwordless or social
+   - `complete`: treat the link as already processed and require an explicit
+     sign-in; never attach the currently active account.
+5. Invitation onboarding requires Clerk to expose the accepted student
+   organization as the Active Organization. It never substitutes another
+   student organization from the user's membership list. Ordinary student
+   sign-in may still offer a classroom selector.
+6. If the user has no password (for example, an existing passwordless or social
    account), the user creates one. Passwords are never generated, emailed, logged,
    or stored by the website.
-6. The site synchronizes `/me/profile` using the current Clerk token.
-7. Only after these checks pass does the site expose the launcher download.
+7. The site synchronizes `/me/profile` using the current Clerk token.
+8. Only after these checks pass does the site expose the launcher download.
 
 Direct access to the invitation path without a Clerk ticket does not create a
 student account.
