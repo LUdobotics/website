@@ -6,6 +6,7 @@ export type OdysseyStudentTelemetry = {
     clerk_user_id: string | null;
     email: string | null;
     display_name: string | null;
+    profile_image_url: string | null;
   };
   chapter: string | null;
   checkpoint: string | null;
@@ -39,6 +40,7 @@ export type DashboardStudent = {
   name: string;
   email: string;
   initials: string;
+  profileImageUrl: string | null;
   chapter: string;
   checkpointId: string;
   checkpoint: string;
@@ -50,8 +52,12 @@ export type DashboardStudent = {
   commandsTotal: number;
   commandsSuccessful: number;
   commandAccuracy: number;
+  averageCommandSimilarity: number;
   commandMistakes: number;
+  totalCommandPenalty: number;
   failures: number;
+  mostCommonMistake: string;
+  mostCommonMistakeCount: number;
   topMistakes: string;
   helpRequested: boolean;
   status: StudentStatus;
@@ -124,6 +130,7 @@ export function normalizeTelemetry(student: OdysseyStudentTelemetry): DashboardS
     name,
     email: student.user.email ?? student.user.clerk_user_id ?? student.user.id,
     initials: initialsFor(name),
+    profileImageUrl: student.user.profile_image_url,
     chapter: student.chapter ?? 'Not started',
     checkpointId: student.checkpoint ?? 'not_started',
     checkpoint: checkpointLabels[student.checkpoint ?? ''] ?? student.checkpoint ?? 'Not started',
@@ -135,8 +142,12 @@ export function normalizeTelemetry(student: OdysseyStudentTelemetry): DashboardS
     commandsTotal: student.commands_total,
     commandsSuccessful: student.commands_successful,
     commandAccuracy: Math.round(student.command_accuracy * 100),
+    averageCommandSimilarity: Math.round(student.average_command_similarity * 100),
     commandMistakes: student.command_mistakes,
+    totalCommandPenalty: student.total_command_penalty,
     failures: student.failures,
+    mostCommonMistake: student.most_common_mistake ?? 'None recorded',
+    mostCommonMistakeCount: student.most_common_mistake_count,
     topMistakes: student.top_mistakes || student.most_common_mistake || 'None recorded',
     helpRequested: student.help_requested,
     status,
@@ -148,33 +159,37 @@ export const demoStudents: DashboardStudent[] = [
   {
     id: 'maya', name: 'Maya Chen', email: 'maya@orbital.edu', initials: 'MC', chapter: 'Ch1',
     checkpointId: 'c1_s05',
-    checkpoint: 'Going to the Deck', state: 'Reviewing navigation commands', progress: 38,
+    profileImageUrl: null, checkpoint: 'Going to the Deck', state: 'Reviewing navigation commands', progress: 38,
     score: 76, maxScore: 100, hintsUsed: 1, commandsTotal: 24, commandsSuccessful: 21,
-    commandAccuracy: 88, commandMistakes: 3, failures: 0, topMistakes: 'topic name',
+    commandAccuracy: 88, averageCommandSimilarity: 91, commandMistakes: 3, totalCommandPenalty: 3,
+    failures: 0, mostCommonMistake: 'topic name', mostCommonMistakeCount: 2, topMistakes: 'topic name',
     helpRequested: false, status: 'on_track', lastSeen: 'Now',
   },
   {
     id: 'leo', name: 'Leo Martin', email: 'leo@orbital.edu', initials: 'LM', chapter: 'Ch1',
     checkpointId: 'c1_s03',
-    checkpoint: 'Entering Spaceship', state: 'Correcting directory path', progress: 21,
+    profileImageUrl: null, checkpoint: 'Entering Spaceship', state: 'Correcting directory path', progress: 21,
     score: 72, maxScore: 100, hintsUsed: 4, commandsTotal: 18, commandsSuccessful: 12,
-    commandAccuracy: 67, commandMistakes: 6, failures: 2, topMistakes: 'service type, namespace',
+    commandAccuracy: 67, averageCommandSimilarity: 74, commandMistakes: 6, totalCommandPenalty: 8,
+    failures: 2, mostCommonMistake: 'service type', mostCommonMistakeCount: 4, topMistakes: 'service type, namespace',
     helpRequested: true, status: 'needs_help', lastSeen: '1m ago',
   },
   {
     id: 'sana', name: 'Sana Diallo', email: 'sana@orbital.edu', initials: 'SD', chapter: 'Ch1',
     checkpointId: 'c1_s06',
-    checkpoint: 'ARGOS Mission brief', state: 'Preparing mission commands', progress: 47,
+    profileImageUrl: null, checkpoint: 'ARGOS Mission brief', state: 'Preparing mission commands', progress: 47,
     score: 84, maxScore: 100, hintsUsed: 0, commandsTotal: 31, commandsSuccessful: 29,
-    commandAccuracy: 94, commandMistakes: 2, failures: 0, topMistakes: 'None recorded',
+    commandAccuracy: 94, averageCommandSimilarity: 96, commandMistakes: 2, totalCommandPenalty: 2,
+    failures: 0, mostCommonMistake: 'None recorded', mostCommonMistakeCount: 0, topMistakes: 'None recorded',
     helpRequested: false, status: 'on_track', lastSeen: 'Now',
   },
   {
     id: 'noah', name: 'Noah Weber', email: 'noah@orbital.edu', initials: 'NW', chapter: 'Ch1',
     checkpointId: 'c1_s01',
-    checkpoint: 'Exterior', state: 'Reviewing first terminal prompt', progress: 6,
+    profileImageUrl: null, checkpoint: 'Exterior', state: 'Reviewing first terminal prompt', progress: 6,
     score: 70, maxScore: 100, hintsUsed: 2, commandsTotal: 8, commandsSuccessful: 6,
-    commandAccuracy: 75, commandMistakes: 2, failures: 0, topMistakes: 'package path',
+    commandAccuracy: 75, averageCommandSimilarity: 82, commandMistakes: 2, totalCommandPenalty: 2,
+    failures: 0, mostCommonMistake: 'package path', mostCommonMistakeCount: 2, topMistakes: 'package path',
     helpRequested: false, status: 'inactive', lastSeen: '2d ago',
   },
 ];

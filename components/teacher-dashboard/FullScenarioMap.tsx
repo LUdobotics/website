@@ -1,9 +1,9 @@
 import React, { useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ChevronDown, ChevronRight, GitBranch, MapPin, X } from 'lucide-react';
+import { ChevronDown, ChevronRight, GitBranch, Lock, MapPin, X } from 'lucide-react';
 import {
-  getOdysseyScenarioStepDetails,
   odysseyScenario,
+  odysseyScenarioStepDetails,
   OdysseyScenarioChapter,
   OdysseyScenarioStep,
 } from './launcherScenario.generated';
@@ -20,6 +20,26 @@ const graphNodeRadius = 16;
 function requirements(step: OdysseyScenarioStep): string[] {
   return step.requires?.allOf?.filter(id => id !== step.id) ?? [];
 }
+
+function commandTokenClassName(token: string, index: number): string {
+  if (index === 0) return 'text-sky-300';
+  if (index === 1) return 'text-violet-300';
+  if (token.startsWith('-')) return 'text-amber-300';
+  if (token.includes(':=')) return 'text-emerald-300';
+  return 'text-slate-100';
+}
+
+const ShellCommand: React.FC<{ command: string }> = ({ command }) => (
+  <pre className="mt-3 overflow-x-auto rounded-md border border-slate-700 bg-slate-950 p-3 text-xs shadow-inner">
+    <code className="font-mono">
+      {command.split(/\s+/).map((token, index) => (
+        <span className={commandTokenClassName(token, index)} key={`${index}-${token}`}>
+          {index > 0 ? ' ' : ''}{token}
+        </span>
+      ))}
+    </code>
+  </pre>
+);
 
 function chapterLayout(chapter: OdysseyScenarioChapter) {
   const positions = new Map<string, Position>();
@@ -99,6 +119,20 @@ export const FullScenarioMap: React.FC<{ students: DashboardStudent[] }> = ({ st
 
       <div className="space-y-3 p-4 sm:p-6">
         {odysseyScenario.chapters.map(chapter => {
+          if (!chapter.isAvailable) {
+            return (
+              <div key={chapter.chapterId} className="rounded-xl border border-dashed border-white/10 bg-white/[0.025] px-4 py-5 text-white/40">
+                <div className="flex items-center gap-3">
+                  <Lock size={16} className="shrink-0" />
+                  <span className="font-orbitron text-xs font-bold">{chapter.title}</span>
+                  <span className="ml-auto rounded-full bg-white/[0.06] px-2 py-1 font-mono text-[9px] uppercase tracking-wider">
+                    Coming soon
+                  </span>
+                </div>
+              </div>
+            );
+          }
+
           const open = openChapterIds.has(chapter.chapterId);
           const chapterStudents = students.filter(student => student.chapter === chapter.chapterId);
           const needsHelp = chapterStudents.filter(student => student.status === 'needs_help').length;
@@ -193,20 +227,43 @@ const ChapterGraph: React.FC<{
 };
 
 const StepDialog: React.FC<{ selection: SelectedStep; onClose: () => void }> = ({ selection, onClose }) => {
-  const details = getOdysseyScenarioStepDetails(selection.chapter, selection.step);
+  const details = odysseyScenarioStepDetails[selection.step.id];
+  if (!details) return null;
+
   return (
     <div role="dialog" aria-modal="true" aria-label={selection.step.label} className="fixed inset-0 z-[130] flex items-center justify-center bg-ludo-deep/90 p-4 backdrop-blur-md" onMouseDown={event => event.target === event.currentTarget && onClose()}>
-      <motion.div initial={{ opacity: 0, scale: .96 }} animate={{ opacity: 1, scale: 1 }} className="w-full max-w-3xl overflow-hidden rounded-2xl border border-ludo-cyan/30 bg-[#06101d] shadow-[0_0_60px_rgba(0,255,255,.14)]">
+      <motion.div initial={{ opacity: 0, scale: .96 }} animate={{ opacity: 1, scale: 1 }} className="max-h-[90vh] w-full max-w-5xl overflow-y-auto rounded-2xl border border-ludo-cyan/30 bg-[#06101d] shadow-[0_0_60px_rgba(0,255,255,.14)]">
         <div className="flex items-start justify-between border-b border-white/10 p-5">
-          <div><p className="font-mono text-[9px] uppercase tracking-widest text-ludo-cyan">{selection.chapter.title}</p><h3 className="mt-2 font-orbitron text-xl font-bold text-white">{selection.step.label}</h3></div>
+          <div><p className="font-mono text-[9px] uppercase tracking-widest text-ludo-cyan">{selection.chapter.title}</p><h3 className="mt-2 font-orbitron text-xl font-bold text-white">{details.overviewTitle}</h3></div>
           <button type="button" aria-label="Close checkpoint details" onClick={onClose} className="rounded-lg p-2 text-white/45 hover:bg-white/5 hover:text-white"><X size={20} /></button>
         </div>
-        <div className="grid md:grid-cols-[.8fr_1.2fr]">
-          <div className="flex min-h-56 items-center justify-center p-7 text-white" style={{ background: details.accentBackground }}>
-            <div className="text-center"><MapPin className="mx-auto" size={28} /><p className="mt-3 font-orbitron font-bold">{selection.step.location}</p><p className="mt-2 font-mono text-xs opacity-70">{selection.step.puzzleId ?? selection.step.id}</p></div>
+        <div className="grid md:grid-cols-2">
+          <div className="relative min-h-72 overflow-hidden text-white md:min-h-[28rem]" style={{ background: details.accentBackground }}>
+            <img
+              alt={details.overviewTitle}
+              className="absolute inset-0 h-full w-full object-cover"
+              onError={event => event.currentTarget.remove()}
+              src={`/teacher-dashboard/steps/${selection.step.id}.webp`}
+            />
+            <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-ludo-deep/95 to-transparent p-7 pt-20">
+              <MapPin size={24} />
+              <p className="mt-3 font-orbitron font-bold">{selection.step.location}</p>
+              <p className="mt-2 font-mono text-xs opacity-70">{selection.step.puzzleId ?? selection.step.id}</p>
+            </div>
           </div>
           <div className="space-y-5 p-6">
-            <div><p className="font-mono text-[9px] uppercase tracking-widest text-ludo-cyan">Teacher note</p><p className="mt-2 font-grotesk text-sm leading-relaxed text-white/65">{details.teacherNote}</p></div>
+            <div><p className="font-mono text-[9px] uppercase tracking-widest text-ludo-cyan">Overview</p><p className="mt-2 font-grotesk text-sm leading-relaxed text-white/70">{details.overview}</p></div>
+            <div>
+              <p className="font-mono text-[9px] uppercase tracking-widest text-ludo-cyan">Teacher note</p>
+              <p className="mt-2 font-grotesk text-sm leading-relaxed text-white/65">{details.teacherNote}</p>
+              {details.commands?.map(command => <ShellCommand command={command} key={command} />)}
+            </div>
+            <div>
+              <p className="font-mono text-[9px] uppercase tracking-widest text-white/35">Learning objectives</p>
+              <ul className="mt-2 list-inside list-disc space-y-1 font-grotesk text-sm text-white/65">
+                {details.learningObjectives.map(objective => <li key={objective}>{objective}</li>)}
+              </ul>
+            </div>
             <div><p className="font-mono text-[9px] uppercase tracking-widest text-white/35">Prerequisites</p><p className="mt-2 font-grotesk text-sm text-white/65">{requirements(selection.step).join(', ') || 'Start of chapter'}</p></div>
           </div>
         </div>

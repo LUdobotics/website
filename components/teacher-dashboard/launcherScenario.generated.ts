@@ -14,6 +14,8 @@ export type OdysseyScenarioStep = {
 export type OdysseyScenarioChapter = {
   chapterId: string;
   title: string;
+  /** Controls whether the teacher dashboard renders the interactive chapter graph. */
+  isAvailable: boolean;
   steps: OdysseyScenarioStep[];
 };
 
@@ -23,49 +25,47 @@ export type OdysseyScenario = {
 };
 
 export type OdysseyScenarioStepDetails = {
-  imagePlaceholderLabel: string;
-  imagePlaceholderSubtitle: string;
+  overviewTitle: string;
+  overview: string;
   teacherNote: string;
-  futureContentItems: string[];
+  commands?: string[];
+  learningObjectives: string[];
   accentBackground: string;
 };
 
-const futureContentItems = [
-  "Screenshot or concept art for this area.",
-  "Expected ROS 2 command pattern.",
-  "Most common mistake for this checkpoint.",
-  "Suggested teacher intervention.",
-];
-
-function hashScenarioValue(value: string): number {
-  let hash = 0;
-  for (let index = 0; index < value.length; index += 1) {
-    hash = ((hash << 5) - hash + value.charCodeAt(index)) | 0;
-  }
-  return Math.abs(hash);
-}
-
-function scenarioStepAccent(stepId: string): string {
-  const hue = hashScenarioValue(stepId) % 360;
-  return `linear-gradient(135deg, hsl(${hue} 70% 36%), hsl(${(hue + 58) % 360} 66% 48%))`;
-}
-
-export function getOdysseyScenarioStepDetails(
-  chapter: OdysseyScenarioChapter,
-  step: OdysseyScenarioStep,
-): OdysseyScenarioStepDetails {
-  const puzzleText = step.puzzleId === undefined
-    ? "This checkpoint tracks narrative and navigation progress."
-    : `This checkpoint is linked to puzzle ${step.puzzleId}.`;
-
-  return {
-    imagePlaceholderLabel: step.location,
-    imagePlaceholderSubtitle: "Area image placeholder",
-    teacherNote: `${step.label} is a placeholder teacher note for ${chapter.title}. Replace this text with the intended learning objective, expected commands, common misconceptions, and intervention advice for this area. ${puzzleText}`,
-    futureContentItems,
-    accentBackground: scenarioStepAccent(step.id),
-  };
-}
+export const odysseyScenarioStepDetails: Record<string, OdysseyScenarioStepDetails> = {
+  c1_s01: { overviewTitle: "Starting the game", overview: "The student must reach the ship using the teleop-twist keyboard command", teacherNote: "The teleop-twist keyboard node is already launched in the in-game terminal (F1). If the student accidentally closes it, run:", commands: ["ros2 run teleop_twist_keyboard teleop_twist_keyboard --ros-args -r cmd_vel:=/odie/cmd_vel"], learningObjectives: ["Terminal Usage", "Teleoperation"], accentBackground: "linear-gradient(135deg, hsl(210 64% 30%), hsl(180 60% 44%))" },
+  c1_s02: { overviewTitle: "Unlock the exterior airlock", overview: "A command is displayed to the player, listening to it gives an other command to open the door", teacherNote: "Students often misses spacing, ensure that the commands typed are ", commands: ["ros2 topic echo /entry_door/info", "ros2 topic pub /entry_door/button std_msgs/msg/Empty \"{}\""], learningObjectives: ["ros2 topic echo", "ros2 topic pub"], accentBackground: "linear-gradient(135deg, hsl(205 64% 30%), hsl(174 60% 44%))" },
+  c1_s03: { overviewTitle: "Open the secondary door", overview: "A new topic is displayed to the player, they need to redo the same process, listening to it and publishing the response", teacherNote: "", commands: ["ros2 topic echo /secondary_door/info", "ros2 topic pub /secondary_door/button std_msgs/msg/String \"{data: open}\"]"], learningObjectives: ["ros2 topic echo with a different topic", "ros2 topic pub with a different type"], accentBackground: "linear-gradient(135deg, hsl(195 64% 30%), hsl(160 60% 44%))" },
+  c1_s04: { overviewTitle: "Before the elevator", overview: "Apply the door-control workflow independently to the interior airlock.", teacherNote: "Let the learner compare this task with the first door before intervening.", learningObjectives: ["Transfer a command pattern", "Adapt command arguments", "Diagnose simple input errors"], accentBackground: "linear-gradient(135deg, hsl(182 64% 30%), hsl(145 60% 44%))" },
+  c1_s05: { overviewTitle: "Navigate between ship levels", overview: "Inspect available destinations and reach the command deck.", teacherNote: "Encourage discovery commands before choosing a destination.", learningObjectives: ["Inspect available destinations", "Plan from command output", "Navigate to the correct floor"], accentBackground: "linear-gradient(135deg, hsl(225 64% 30%), hsl(195 60% 44%))" },
+  c1_s06: { overviewTitle: "Receive the recovery mission", overview: "ARGOS identifies the systems that must be restored across the ship.", teacherNote: "Ask the learner to restate the objective and identify the next possible destinations.", learningObjectives: ["Summarise the mission", "Identify parallel tasks", "Turn instructions into actions"], accentBackground: "linear-gradient(135deg, hsl(245 64% 30%), hsl(210 60% 44%))" },
+  c1_s07: { overviewTitle: "Restore auxiliary power", overview: "Inspect the battery subsystem and return it to an operational state.", teacherNote: "Ask what status evidence proves that battery recovery is complete.", learningObjectives: ["Inspect subsystem status", "Select a corrective command", "Verify restored power"], accentBackground: "linear-gradient(135deg, hsl(42 64% 30%), hsl(24 60% 44%))" },
+  c1_s08: { overviewTitle: "Recover engine-room systems", overview: "Reuse the diagnostic workflow on an independent lower-deck subsystem.", teacherNote: "Compare the fixed workflow with the arguments that change for this system.", learningObjectives: ["Reuse a diagnostic workflow", "Adapt command arguments", "Validate engine recovery"], accentBackground: "linear-gradient(135deg, hsl(9 64% 30%), hsl(348 60% 44%))" },
+  c1_s09: { overviewTitle: "Reach the server-maze control", overview: "Use the restored power systems to navigate to the reboot control.", teacherNote: "If access is blocked, verify both prerequisite recovery branches.", learningObjectives: ["Recognise prerequisites", "Navigate from feedback", "Reach the reboot control"], accentBackground: "linear-gradient(135deg, hsl(276 64% 30%), hsl(222 60% 44%))" },
+  c1_s10: { overviewTitle: "Trigger the system reboot", overview: "Send the final signal that brings the recovered ship systems online.", teacherNote: "Review the inspect, command, read, and verify workflow.", learningObjectives: ["Issue the reboot command", "Verify system recovery", "Reflect on CLI troubleshooting"], accentBackground: "linear-gradient(135deg, hsl(152 64% 30%), hsl(188 60% 44%))" },
+  c2_s01: { overviewTitle: "Begin ROS 2 system investigation", overview: "Move from basic CLI use to packages, nodes, topics, and inspection tools.", teacherNote: "Establish the difference between a package, a running node, and exchanged data.", learningObjectives: ["Describe packages and nodes", "Recognise topic communication", "Identify RQT as an inspection tool"], accentBackground: "linear-gradient(135deg, hsl(216 64% 30%), hsl(252 60% 44%))" },
+  c2_s02: { overviewTitle: "Locate the RQT package", overview: "Search the ROS 2 installation for the required graphical tool.", teacherNote: "Emphasise discovery and ask how the output confirms the package is available.", learningObjectives: ["Search installed packages", "Interpret package-list output", "Confirm RQT availability"], accentBackground: "linear-gradient(135deg, hsl(196 64% 30%), hsl(232 60% 44%))" },
+  c2_s03: { overviewTitle: "Use ROS 2 tooling to enter the CCR", overview: "Identify and interact with the component controlling the command-room door.", teacherNote: "Ask which running component is likely responsible before choosing a tool.", learningObjectives: ["Identify a relevant component", "Inspect the door system", "Open the CCR door"], accentBackground: "linear-gradient(135deg, hsl(187 64% 30%), hsl(212 60% 44%))" },
+  c2_s04: { overviewTitle: "Route a camera feed", overview: "Connect the camera data source to the control-room monitoring path.", teacherNote: "Ask the learner to describe the publisher, topic, and subscriber data path.", learningObjectives: ["Identify a camera topic", "Explain publisher-subscriber flow", "Confirm the received feed"], accentBackground: "linear-gradient(135deg, hsl(202 64% 30%), hsl(168 60% 44%))" },
+  c2_s05: { overviewTitle: "Inspect the first maintenance network", overview: "Begin a structured ROS 2 diagnosis across the maintenance bay.", teacherNote: "Use a consistent routine: list, narrow, inspect, then act.", learningObjectives: ["List ROS 2 resources", "Narrow relevant results", "Gather evidence before acting"], accentBackground: "linear-gradient(135deg, hsl(162 64% 30%), hsl(190 60% 44%))" },
+  c2_s06: { overviewTitle: "Trace node communication", overview: "Follow communication between nodes and locate a broken link.", teacherNote: "Correct the publisher-subscriber direction before correcting syntax.", learningObjectives: ["Inspect node interfaces", "Trace a topic", "Identify a broken connection"], accentBackground: "linear-gradient(135deg, hsl(170 64% 30%), hsl(205 60% 44%))" },
+  c2_s07: { overviewTitle: "Inspect live topic data", overview: "Examine topic messages to decide whether the system produces useful data.", teacherNote: "Ask what values and update pattern should be expected.", learningObjectives: ["Inspect a topic type", "Read live messages", "Recognise unexpected data"], accentBackground: "linear-gradient(135deg, hsl(181 64% 30%), hsl(222 60% 44%))" },
+  c2_s08: { overviewTitle: "Call a ROS 2 service", overview: "Use a request-response interaction to change a subsystem state.", teacherNote: "Compare services with continuous topics and inspect the request type first.", learningObjectives: ["Identify a service", "Inspect its request type", "Send a valid request"], accentBackground: "linear-gradient(135deg, hsl(195 64% 30%), hsl(244 60% 44%))" },
+  c2_s09: { overviewTitle: "Combine inspection techniques", overview: "Use package, node, topic, and service discovery in one diagnosis.", teacherNote: "Let the learner choose the investigation order, then discuss its efficiency.", learningObjectives: ["Plan a diagnostic sequence", "Combine ROS 2 tools", "Resolve the maintenance fault"], accentBackground: "linear-gradient(135deg, hsl(213 64% 30%), hsl(270 60% 44%))" },
+  c2_s10: { overviewTitle: "Establish the vault connection", overview: "Connect the restored maintenance network to the secure server vault.", teacherNote: "Verify both endpoints; a visible node alone does not prove data flow.", learningObjectives: ["Verify endpoint availability", "Confirm a communication path", "Establish the connection"], accentBackground: "linear-gradient(135deg, hsl(225 64% 30%), hsl(284 60% 44%))" },
+  c2_s11: { overviewTitle: "Complete the secure-vault challenge", overview: "Apply ROS 2 discovery skills within a restricted system context.", teacherNote: "Similar identifiers make careful reading more important than speed.", learningObjectives: ["Distinguish similar resources", "Choose the correct interface", "Complete the vault interaction"], accentBackground: "linear-gradient(135deg, hsl(267 64% 30%), hsl(326 60% 44%))" },
+  c2_s12: { overviewTitle: "Report the recovered systems", overview: "Return to ARGOS with the maintenance network and vault operational.", teacherNote: "Ask for examples that explain nodes, topics, and services in context.", learningObjectives: ["Summarise the recovery", "Explain ROS 2 concepts", "Identify useful diagnostic tools"], accentBackground: "linear-gradient(135deg, hsl(244 64% 30%), hsl(204 60% 44%))" },
+  c2_s13: { overviewTitle: "Prepare for coordinated launch", overview: "Move from individual components to repeatable multi-system startup.", teacherNote: "Preview how launch files reduce repetitive manual setup.", learningObjectives: ["Recognise coordinated startup", "Connect nodes to a system", "Prepare to use launch files"], accentBackground: "linear-gradient(135deg, hsl(221 64% 30%), hsl(174 60% 44%))" },
+  c3_s01: { overviewTitle: "Coordinate the robotics systems", overview: "Bring the ship robot platform online using launch files and runtime controls.", teacherNote: "Contrast repeatable launch files with manually starting every node.", learningObjectives: ["Explain launch files", "Identify systems that start together", "Understand repeatable startup"], accentBackground: "linear-gradient(135deg, hsl(218 64% 30%), hsl(260 60% 44%))" },
+  c3_s02: { overviewTitle: "Find the robot launch configuration", overview: "Locate package launch files and select the robot configuration.", teacherNote: "Inspect the package before running an unfamiliar launch file.", learningObjectives: ["Locate launch files", "Interpret file names", "Choose the correct configuration"], accentBackground: "linear-gradient(135deg, hsl(202 64% 30%), hsl(250 60% 44%))" },
+  c3_s03: { overviewTitle: "Start the robot stack", overview: "Run the launch file and observe multiple ROS 2 nodes starting together.", teacherNote: "Identify nodes created by the file and distinguish warnings from fatal errors.", learningObjectives: ["Run a launch file", "Read startup output", "Verify expected nodes"], accentBackground: "linear-gradient(135deg, hsl(185 64% 30%), hsl(228 60% 44%))" },
+  c3_s04: { overviewTitle: "Drive the robot manually", overview: "Start teleoperation and send controlled movements in the testing arena.", teacherNote: "Prioritise small movements and confirm the learner can stop the robot.", learningObjectives: ["Start teleoperation", "Send safe movement commands", "Stop and recover control"], accentBackground: "linear-gradient(135deg, hsl(154 64% 30%), hsl(194 60% 44%))" },
+  c3_s05: { overviewTitle: "Verify robot sensor data", overview: "Confirm that the robot stack receives live environmental data.", teacherNote: "Ask how sensor values should change as the robot moves.", learningObjectives: ["Identify sensor topics", "Inspect live messages", "Relate data to motion"], accentBackground: "linear-gradient(135deg, hsl(172 64% 30%), hsl(214 60% 44%))" },
+  c3_s06: { overviewTitle: "Start autonomous navigation", overview: "Bring navigation online and check its required nodes and interfaces.", teacherNote: "Identify dependencies first and trace failures from the earliest relevant error.", learningObjectives: ["Start navigation", "Check required interfaces", "Trace dependency failures"], accentBackground: "linear-gradient(135deg, hsl(198 64% 30%), hsl(245 60% 44%))" },
+  c3_s07: { overviewTitle: "Launch the integrated robot system", overview: "Verify communication across control, sensing, and navigation.", teacherNote: "Check node presence, topic flow, and behaviour—not only running processes.", learningObjectives: ["Launch a coordinated graph", "Verify subsystem communication", "Diagnose integration issues"], accentBackground: "linear-gradient(135deg, hsl(225 64% 30%), hsl(281 60% 44%))" },
+  c3_s08: { overviewTitle: "Validate mission readiness", overview: "Perform final checks that confirm the robot and ROS 2 systems are ready.", teacherNote: "Ask the learner to justify readiness using nodes, topics, sensors, and behaviour.", learningObjectives: ["Perform an end-to-end check", "Support conclusions with evidence", "Explain a troubleshooting workflow"], accentBackground: "linear-gradient(135deg, hsl(151 64% 30%), hsl(197 60% 44%))" },
+};
 
 export const odysseyScenario: OdysseyScenario = {
   title: "Odyssey Chapters 1-3",
@@ -73,11 +73,12 @@ export const odysseyScenario: OdysseyScenario = {
     {
       chapterId: "Ch1",
       title: "Chapter 1 - CLI",
+      isAvailable: true,
       steps: [
         { id: "c1_s01", label: "Exterior", location: "Exterior", puzzleId: "P1.0" },
         { id: "c1_s02", label: "Entry Door", location: "Airlock ext.", puzzleId: "P1.1", requires: { allOf: ["c1_s01"] } },
-        { id: "c1_s03", label: "Entering Spaceship", location: "Airlock ext.", puzzleId: "P1.1", requires: { allOf: ["c1_s02"] } },
-        { id: "c1_s04", label: "Second door", location: "Airlock int.", puzzleId: "P1.2", requires: { allOf: ["c1_s03"] } },
+        { id: "c1_s03", label: "Entering Spaceship", location: "Airlock int.", puzzleId: "P1.1", requires: { allOf: ["c1_s02"] } },
+        { id: "c1_s04", label: "Second door", location: "Floor 0", puzzleId: "P1.2", requires: { allOf: ["c1_s03"] } },
         { id: "c1_s05", label: "Going to the Deck", location: "Floors 0, 3, 9", puzzleId: "P1.3", requires: { allOf: ["c1_s04"] } },
         { id: "c1_s06", label: "Argos Mission brief", location: "Floor 9", puzzleId: "P1.3", requires: { allOf: ["c1_s05"] } },
         { id: "c1_s07", label: "Battery Room", location: "Floor 5", puzzleId: "P1.4", requires: { allOf: ["c1_s06"] } },
@@ -89,6 +90,7 @@ export const odysseyScenario: OdysseyScenario = {
     {
       chapterId: "Ch2",
       title: "Chapter 2 - Packages, Nodes and Tools",
+      isAvailable: false,
       steps: [
         { id: "c2_s01", label: "ARGOS Briefing", location: "Floor 9 Deck" },
         { id: "c2_s02", label: "Find RQT Package", location: "Floor 7 Elevator", requires: { allOf: ["c2_s01"] } },
@@ -108,6 +110,7 @@ export const odysseyScenario: OdysseyScenario = {
     {
       chapterId: "Ch3",
       title: "Chapter 3 - Launch Files and Robot Control",
+      isAvailable: false,
       steps: [
         { id: "c3_s01", label: "ARGOS Chapter 3 Briefing", location: "Floor 9 Deck" },
         { id: "c3_s02", label: "Launch System Discovery", location: "Robotics Lab", requires: { allOf: ["c3_s01"] } },

@@ -1,5 +1,5 @@
 import { watch } from 'node:fs';
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { copyFile, mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
@@ -13,9 +13,14 @@ const generatedPath = path.join(
   websiteRoot,
   'components/teacher-dashboard/launcherScenario.generated.ts',
 );
+const launcherStepsPath = process.env.LUDOBOTICS_LAUNCHER_STEPS
+  ? path.resolve(process.env.LUDOBOTICS_LAUNCHER_STEPS)
+  : path.resolve(websiteRoot, '../patchkit/ludobotix-launcher/theme/public/teacher-dashboard/steps');
+const websiteStepsPath = path.join(websiteRoot, 'public/teacher-dashboard/steps');
+const checkOnly = process.argv.includes('--check');
+const supportedAssetPattern = /\.(?:webp|png|jpe?g)$/i;
 
-async function syncScenario() {
-  const source = await readFile(launcherScenarioPath, 'utf8');
+function generatedScenario(source) {
   const banner = [
     '// AUTO-GENERATED FROM THE LUDOBOTICS LAUNCHER.',
     '// Run `npm run sync:teacher-dashboard` after editing the launcher scenario.',
@@ -23,32 +28,85 @@ async function syncScenario() {
     '',
   ].join('\n');
 
+  return `${banner}${source}`;
+}
+
+async function sameContents(firstPath, secondPath) {
+  try {
+    const [first, second] = await Promise.all([readFile(firstPath), readFile(secondPath)]);
+    return first.equals(second);
+  } catch {
+    return false;
+  }
+}
+
+async function syncScenario() {
+  const source = await readFile(launcherScenarioPath, 'utf8');
+  const generated = generatedScenario(source);
+
+  if (checkOnly) {
+    const current = await readFile(generatedPath, 'utf8').catch(() => '');
+    if (current !== generated) throw new Error('The generated website scenario is stale.');
+    return;
+  }
+
   await mkdir(path.dirname(generatedPath), { recursive: true });
-  await writeFile(generatedPath, `${banner}${source}`, 'utf8');
-  console.log(`Synced teacher dashboard scenario from ${launcherScenarioPath}`);
+  await writeFile(generatedPath, generated, 'utf8');
+}
+
+async function syncAssets() {
+  const assetNames = (await readdir(launcherStepsPath)).filter(name => supportedAssetPattern.test(name));
+
+  if (checkOnly) {
+    const staleAssets = [];
+    for (const name of assetNames) {
+      if (!await sameContents(path.join(launcherStepsPath, name), path.join(websiteStepsPath, name))) {
+        staleAssets.push(name);
+      }
+    }
+    if (staleAssets.length > 0) {
+      throw new Error(`Website checkpoint assets are stale: ${staleAssets.join(', ')}`);
+    }
+    return;
+  }
+
+  await mkdir(websiteStepsPath, { recursive: true });
+  await Promise.all(assetNames.map(name => copyFile(
+    path.join(launcherStepsPath, name),
+    path.join(websiteStepsPath, name),
+  )));
+}
+
+async function syncDashboard() {
+  await Promise.all([syncScenario(), syncAssets()]);
+  console.log(checkOnly
+    ? 'Teacher dashboard scenario and assets match the launcher.'
+    : `Synced teacher dashboard scenario and assets from ${path.dirname(launcherScenarioPath)}`);
 }
 
 async function run() {
-  await syncScenario();
+  await syncDashboard();
 
   if (!process.argv.includes('--watch')) return;
 
-  console.log('Watching the launcher scenario for changes. Press Ctrl+C to stop.');
+  console.log('Watching the launcher dashboard data and assets. Press Ctrl+C to stop.');
   let timer;
-  watch(launcherScenarioPath, () => {
+  const scheduleSync = () => {
     clearTimeout(timer);
     timer = setTimeout(() => {
-      void syncScenario().catch(error => {
+      void syncDashboard().catch(error => {
         console.error(error);
         process.exitCode = 1;
       });
     }, 120);
-  });
+  };
+  watch(launcherScenarioPath, scheduleSync);
+  watch(launcherStepsPath, scheduleSync);
 }
 
 run().catch(error => {
   console.error(
-    `Unable to sync the launcher scenario. Set LUDOBOTICS_LAUNCHER_SCENARIO if the launcher is not at the default sibling path.\n${error}`,
+    `Unable to sync the launcher dashboard. Set LUDOBOTICS_LAUNCHER_SCENARIO and LUDOBOTICS_LAUNCHER_STEPS if the launcher is not at the default sibling path.\n${error}`,
   );
   process.exitCode = 1;
 });

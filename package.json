@@ -11,6 +11,7 @@
     "predeploy": "npm run build",
     "deploy": "gh-pages -d dist",
     "sync:teacher-dashboard": "node scripts/sync-teacher-dashboard.mjs",
+    "sync:teacher-dashboard:check": "node scripts/sync-teacher-dashboard.mjs --check",
     "sync:teacher-dashboard:watch": "node scripts/sync-teacher-dashboard.mjs --watch",
     "test": "vitest run"
   },

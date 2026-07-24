@@ -27,6 +27,37 @@ const average = (values: number[]) => values.length
   ? Math.round(values.reduce((sum, value) => sum + value, 0) / values.length)
   : 0;
 
+function avatarColor(value: string): string {
+  let hash = 0;
+  for (let index = 0; index < value.length; index += 1) {
+    hash = ((hash << 5) - hash + value.charCodeAt(index)) | 0;
+  }
+  return `hsl(${Math.abs(hash) % 360} 70% 42%)`;
+}
+
+const StudentAvatar: React.FC<{ student: DashboardStudent; className?: string }> = ({ student, className = '' }) => (
+  <span
+    className={`relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-ludo-cyan/20 font-mono text-[10px] font-bold text-white ${className}`}
+    style={{ backgroundColor: avatarColor(student.id) }}
+  >
+    {student.helpRequested && (
+      <>
+        <span className="absolute -inset-2 animate-pulse rounded-full border-2 border-ludo-orange/70" />
+        <span className="absolute -right-1.5 -top-1.5 z-30 flex h-4 w-4 items-center justify-center rounded-full bg-ludo-orange text-[9px] font-black text-ludo-deep">!</span>
+      </>
+    )}
+    <span className="relative z-10">{student.initials}</span>
+    {student.profileImageUrl && (
+      <img
+        alt=""
+        className="absolute inset-0 z-20 h-full w-full rounded-full object-cover"
+        onError={event => event.currentTarget.remove()}
+        src={student.profileImageUrl}
+      />
+    )}
+  </span>
+);
+
 export const TeacherDashboardView: React.FC<TeacherDashboardViewProps> = ({
   students,
   organizationName = 'Orbital Academy',
@@ -132,13 +163,8 @@ export const TeacherDashboardView: React.FC<TeacherDashboardViewProps> = ({
                   <p className="mt-2 truncate font-grotesk text-[9px] text-white/55 sm:text-[10px]">{milestone}</p>
                   <div className="mt-2 flex min-h-6 justify-center -space-x-1.5">
                     {milestoneStudents.slice(0, 3).map(student => (
-                      <motion.span
-                        layout
-                        key={student.id}
-                        title={student.name}
-                        className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-[#071422] bg-ludo-blue/80 font-mono text-[8px] font-bold text-white"
-                      >
-                        {student.initials}
+                      <motion.span layout key={student.id} title={student.name}>
+                        <StudentAvatar className="h-6 w-6 border-2 border-[#071422] text-[8px]" student={student} />
                       </motion.span>
                     ))}
                   </div>
@@ -186,9 +212,7 @@ export const TeacherDashboardView: React.FC<TeacherDashboardViewProps> = ({
                     >
                       <span className="flex min-w-0 items-center gap-2.5">
                         {expanded ? <ChevronDown size={13} className="shrink-0 text-white/35" /> : <ChevronRight size={13} className="shrink-0 text-white/35" />}
-                        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-ludo-cyan/20 bg-ludo-blue/25 font-mono text-[10px] font-bold text-ludo-cyan">
-                          {student.initials}
-                        </span>
+                        <StudentAvatar student={student} />
                         <span className="min-w-0">
                           <span className="block truncate font-grotesk text-xs font-semibold text-white">{student.name}</span>
                           <span className="block truncate font-grotesk text-[10px] text-white/40">{student.checkpoint}</span>
@@ -230,6 +254,13 @@ export const TeacherDashboardView: React.FC<TeacherDashboardViewProps> = ({
                             <Detail label="Commands" value={`${student.commandsSuccessful}/${student.commandsTotal}`} />
                             <Detail label="Score" value={student.maxScore ? `${student.score}/${student.maxScore}` : student.score} />
                             <Detail label="Hints / failures" value={`${student.hintsUsed} / ${student.failures}`} />
+                            <Detail label="Command mistakes" value={student.commandMistakes} />
+                            <Detail label="Average similarity" value={`${student.averageCommandSimilarity}%`} />
+                            <Detail label="Penalty" value={student.totalCommandPenalty} />
+                            <Detail
+                              label="Most common mistake"
+                              value={`${student.mostCommonMistake}${student.mostCommonMistakeCount > 0 ? ` (${student.mostCommonMistakeCount})` : ''}`}
+                            />
                             <div className="col-span-2 sm:col-span-4 flex items-start gap-2 rounded-lg border border-white/[0.08] bg-white/[0.025] p-3">
                               <CircleHelp size={14} className={student.helpRequested ? 'mt-0.5 shrink-0 text-ludo-orange' : 'mt-0.5 shrink-0 text-ludo-cyan'} />
                               <div>
@@ -240,6 +271,10 @@ export const TeacherDashboardView: React.FC<TeacherDashboardViewProps> = ({
                                     : `${student.state}. Most common issue: ${student.topMistakes}.`}
                                 </p>
                               </div>
+                            </div>
+                            <div className="col-span-2 rounded-lg border border-white/[0.08] bg-white/[0.025] p-3 sm:col-span-4">
+                              <p className="font-mono text-[9px] uppercase tracking-wider text-white/40">Full top mistakes</p>
+                              <p className="mt-1 font-grotesk text-[11px] text-white/70">{student.topMistakes}</p>
                             </div>
                           </div>
                         </motion.div>
