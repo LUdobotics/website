@@ -3,8 +3,10 @@ import { Navbar } from './components/Navbar';
 import { Hero } from './components/Hero';
 import { Problem } from './components/Problem';
 import { Solution } from './components/Solution';
+import { TeacherBenefits } from './components/TeacherBenefits';
 import { Features } from './components/Features';
 import { Impact } from './components/Impact';
+import { Team } from './components/Team';
 import { Roadmap } from './components/Roadmap';
 import { CTA } from './components/CTA';
 import { Footer } from './components/Footer';
@@ -46,12 +48,14 @@ function App({ isClerkConfigured }: AppProps) {
     <div className="min-h-screen bg-ludo-deep text-white selection:bg-ludo-cyan selection:text-ludo-deep">
       <Navbar onOpenBeta={openBeta} onOpenSneakPeek={openSneakPeek} />
       <main>
-        <Hero onOpenBeta={openBeta} />
+        <Hero onOpenBeta={openBeta} onOpenSneakPeek={openSneakPeek} />
         <Problem />
         <Solution />
         <Features />
+        <TeacherBenefits />
         <Impact />
         <Roadmap />
+        <Team />
         <CTA onOpenBeta={openBeta} />
       </main>
       <Footer />

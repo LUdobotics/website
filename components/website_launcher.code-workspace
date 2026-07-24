@@ -1,0 +1,11 @@
+{
+	"folders": [
+		{
+			"path": ".."
+		},
+		{
+			"path": "../../patchkit/ludobotix-launcher"
+		}
+	],
+	"settings": {}
+}

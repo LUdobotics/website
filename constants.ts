@@ -18,7 +18,9 @@ export const NAV_ITEMS: NavItem[] = [
   { label: 'Problem', href: '#problem' },
   { label: 'Solution', href: '#solution' },
   { label: 'Features', href: '#features' },
+  { label: 'For Teachers', href: '#teachers' },
   { label: 'Roadmap', href: '#roadmap' },
+  { label: 'Team', href: '#team' },
 ];
 
 export const PROBLEMS: ProblemCard[] = [
@@ -64,27 +66,29 @@ export const FEATURES: Feature[] = [
 
 export const METRICS: Metric[] = [
   {
-    value: "70",
+    value: "57",
     suffix: "%",
-    label: "Faster ROS 2 Mastery",
-    description: "Gamified repetition and narrative reinforcement deliver faster skill acquisition.",
+    label: "Fewer failing students",
+    description: "More learners stay on track through active practice, immediate feedback, and timely teacher intervention.",
+    sourceUrl: "https://onlinelibrary.wiley.com/doi/10.1002/cae.70071",
   },
   {
-    value: "3",
+    value: "3.3",
     suffix: "×",
-    label: "Higher Retention",
-    description: "Game-based learning improves conceptual memory and long-term understanding.",
+    label: "More top-performing engineers",
+    description: "High-potential learners have more room to practise, experiment, and demonstrate advanced mastery.",
+    sourceUrl: "https://onlinelibrary.wiley.com/doi/10.1002/cae.70071",
   },
   {
     value: "0",
-    label: "Hardware Required",
-    description: "Train anytime, anywhere — no robots, no labs, no scheduling constraints.",
+    label: "Hardware required",
+    description: "Train anytime, anywhere — no robots, labs, or hardware scheduling constraints.",
   },
 ];
 
 export const ROADMAP: RoadmapItem[] = [
   {
-    date: "Early 2026",
+    date: "Right now",
     title: "Beta Program & Educator Feedback",
     description: "Selected institutions gain early access. We incorporate real educator and learner insights to shape the final product.",
   },

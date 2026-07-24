@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { AlertTriangle, CheckCircle2, Download, FileCode2, Terminal } from 'lucide-react';
+import { AlertTriangle, ArrowLeft, CheckCircle2, Download, FileCode2, Terminal } from 'lucide-react';
 import { Section } from './ui/Section';
 
 const downloadUrl = 'https://dl.patchkit.net/d/21plmqaazwhzt3484oibu/direct';
@@ -33,6 +33,14 @@ export const LauncherDownloadStudent: React.FC = () => {
 
         <div className="container mx-auto px-6 relative z-10 py-16 md:py-24">
           <div className="max-w-5xl mx-auto">
+            <a
+              href="/account/manage"
+              className="mb-10 inline-flex items-center gap-2 rounded-lg border border-white/10 bg-ludo-panel/70 px-3 py-2 font-mono text-[10px] uppercase tracking-widest text-white/55 transition-colors hover:border-ludo-cyan/35 hover:text-ludo-cyan"
+            >
+              <ArrowLeft size={14} />
+              Account management
+            </a>
+
             <motion.div
               initial={{ opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
@@ -74,8 +82,13 @@ export const LauncherDownloadStudent: React.FC = () => {
                   transition={{ delay: 0.15 + index * 0.1, duration: 0.55 }}
                   className="bg-ludo-panel border border-ludo-border/40 rounded-xl p-6"
                 >
-                  <div className="w-12 h-12 bg-gradient-to-br from-ludo-cyan/20 to-ludo-blue/20 rounded-xl flex items-center justify-center border border-ludo-cyan/30 mb-5">
-                    <step.icon className="text-ludo-cyan" size={24} />
+                  <div className="mb-5 flex items-center justify-between">
+                    <span className="flex h-12 w-12 items-center justify-center rounded-xl border border-ludo-cyan/40 bg-ludo-cyan/10 font-orbitron text-2xl font-black text-ludo-cyan">
+                      {index + 1}
+                    </span>
+                    <div className="w-12 h-12 bg-gradient-to-br from-ludo-cyan/20 to-ludo-blue/20 rounded-xl flex items-center justify-center border border-ludo-cyan/30">
+                      <step.icon className="text-ludo-cyan" size={24} />
+                    </div>
                   </div>
                   <h2 className="font-orbitron text-lg font-bold text-white mb-3">
                     {step.title}
@@ -121,7 +134,7 @@ export const LauncherDownloadStudent: React.FC = () => {
                       If your browser renamed the file, keep the <span className="text-white">.AppImage</span> extension.
                     </li>
                     <li className="border-l-2 border-ludo-orange pl-4">
-                      If your file manager blocks execution, use the terminal command above and launch it again.
+                      If your file manager blocks execution, use the terminal command shown alongside these tips and launch it again.
                     </li>
                     <li className="border-l-2 border-ludo-orange pl-4">
                       If Linux asks whether to trust the file, allow execution for this AppImage.

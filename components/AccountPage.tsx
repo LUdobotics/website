@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   CreateOrganization,
   OrganizationList,
@@ -9,11 +9,18 @@ import {
   SignOutButton,
   SignUp,
   UserProfile,
+  useAuth,
   useOrganization,
   useUser,
 } from '@clerk/react';
-import { ArrowLeft } from 'lucide-react';
+import { AlertTriangle, ArrowLeft, RefreshCw } from 'lucide-react';
 import { Section } from './ui/Section';
+import { TeacherDashboardPage } from './TeacherDashboardPage';
+import {
+  getOdysseyProfileSignature,
+  OdysseyProfileUser,
+  syncOdysseyProfile,
+} from './odysseyProfile';
 
 interface AccountPageProps {
   path: string;
@@ -31,8 +38,8 @@ const clerkAppearance = {
     colorBackground: '#020810',
     colorText: '#ffffff',
     colorTextSecondary: 'rgba(255, 255, 255, 0.82)',
-    colorInputBackground: 'rgba(10, 20, 40, 0.85)',
-    colorInputText: '#ffffff',
+    colorInputBackground: '#ffffff',
+    colorInputText: '#020810',
     borderRadius: '0.75rem',
     fontFamily: 'Space Grotesk, sans-serif',
   },
@@ -43,6 +50,9 @@ const clerkAppearance = {
     headerTitle: 'font-orbitron text-white',
     headerSubtitle: 'text-white/80',
     formFieldLabel: 'text-white/90',
+    formFieldInput: 'bg-white text-ludo-deep placeholder:text-slate-500',
+    navbarButton: 'text-white hover:text-ludo-cyan',
+    menuButton: 'text-white hover:text-ludo-cyan',
     formButtonPrimary: 'font-orbitron uppercase tracking-widest text-ludo-deep',
     footerActionText: 'text-white/70',
     footerActionLink: 'text-ludo-cyan',
@@ -50,10 +60,20 @@ const clerkAppearance = {
   },
 };
 
+const organizationSwitcherAppearance = {
+  ...clerkAppearance,
+  elements: {
+    ...clerkAppearance.elements,
+    rootBox: 'w-auto',
+    organizationSwitcherTrigger: 'w-auto',
+  },
+};
+
 const routeLabels: Record<string, string> = {
   '/account': 'Account workflows',
   '/account/sign-up': 'Teacher onboarding',
   '/account/teacher/sign-up': 'Teacher onboarding',
+  '/account/teacher/dashboard': 'Classroom intelligence',
   '/account/student/invitation': 'Student invitation',
   '/account/student/sign-in': 'Student sign in',
   '/account/sign-in': 'Sign in',
@@ -66,7 +86,11 @@ const routeLabels: Record<string, string> = {
 export const AccountPage: React.FC<AccountPageProps> = ({ path, isClerkConfigured }) => {
   const routeLabel = getRouteLabel(path);
   const routeDescription = getRouteDescription(path);
-  const isManagementRoute = path.startsWith('/account/manage') || path.startsWith('/organization/manage');
+  const isDashboardRoute = path.startsWith('/account/teacher/dashboard');
+  const isAccountManagementRoute = path.startsWith('/account/manage');
+  const isManagementRoute = path.startsWith('/account/manage') || path.startsWith('/organization/manage') || isDashboardRoute;
+  const backHref = isAccountManagementRoute ? '/' : '/account/manage';
+  const backLabel = isAccountManagementRoute ? 'Back to Ludobotics' : 'Account management';
 
   return (
     <div className="min-h-screen bg-ludo-deep text-white selection:bg-ludo-cyan selection:text-ludo-deep">
@@ -76,13 +100,13 @@ export const AccountPage: React.FC<AccountPageProps> = ({ path, isClerkConfigure
         <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-ludo-magenta/10 rounded-full blur-[150px] translate-y-1/2 -translate-x-1/2" />
 
         <div className="container mx-auto px-6 relative z-10 py-16 md:py-24">
-          <div className="max-w-5xl mx-auto">
+          <div className={`${isDashboardRoute ? 'max-w-7xl' : 'max-w-5xl'} mx-auto`}>
             <a
-              href="/"
+              href={backHref}
               className="inline-flex items-center gap-2 text-ludo-muted hover:text-ludo-cyan transition-colors font-mono text-xs uppercase tracking-widest mb-10"
             >
               <ArrowLeft size={16} />
-              Back to Ludobotics
+              {backLabel}
             </a>
 
             <div className={isManagementRoute ? 'space-y-10' : 'grid grid-cols-1 lg:grid-cols-[0.85fr_1.15fr] gap-10 items-start'}>
@@ -90,16 +114,18 @@ export const AccountPage: React.FC<AccountPageProps> = ({ path, isClerkConfigure
                 <div className="inline-flex items-center gap-2 px-3 py-1 mb-6 border border-ludo-cyan/30 rounded-full bg-ludo-cyan/5 backdrop-blur-sm">
                   <span className="w-2 h-2 rounded-full bg-ludo-green animate-pulse" />
                   <span className="font-mono text-xs text-ludo-cyan tracking-widest uppercase">
-                    Hidden account route
+                    {isDashboardRoute ? 'Teacher workspace' : 'Hidden account route'}
                   </span>
                 </div>
 
                 <h1 className="font-orbitron text-4xl md:text-5xl font-black leading-tight mb-5">
                   {routeLabel}
                 </h1>
-                <p className="font-grotesk text-lg text-ludo-muted leading-relaxed max-w-xl">
-                  {routeDescription}
-                </p>
+                {routeDescription && (
+                  <p className="font-grotesk text-lg text-ludo-muted leading-relaxed max-w-xl">
+                    {routeDescription}
+                  </p>
+                )}
 
               </div>
 
@@ -118,6 +144,10 @@ export const AccountPage: React.FC<AccountPageProps> = ({ path, isClerkConfigure
 const ClerkAccountSurface: React.FC<{ path: string }> = ({ path }) => {
   if (path === '/account') {
     return <AccountWorkflowLinks />;
+  }
+
+  if (path.startsWith('/account/teacher/dashboard')) {
+    return <TeacherDashboardPage />;
   }
 
   if (path.startsWith('/account/sign-in') || path.startsWith('/account/student/sign-in')) {
@@ -201,10 +231,98 @@ const AccountWorkflowLinks: React.FC = () => (
   </div>
 );
 
+type AccountManagementTab = 'overview' | 'profile' | 'organization';
+
+const profileRetryDelays = [5_000, 15_000, 30_000];
+
+const useOdysseyProfileSync = ({
+  enabled,
+  getToken,
+  user,
+}: {
+  enabled: boolean;
+  getToken: () => Promise<string | null>;
+  user: OdysseyProfileUser | null | undefined;
+}) => {
+  const [warning, setWarning] = useState('');
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [retryKey, setRetryKey] = useState(0);
+  const lastSyncedSignature = useRef('');
+  const attemptedSignature = useRef('');
+  const retryAttempt = useRef(0);
+  const retryTimer = useRef<number | null>(null);
+  const profileSignature = user ? getOdysseyProfileSignature(user) : '';
+
+  useEffect(() => {
+    if (!enabled || !user || !profileSignature) return;
+    if (lastSyncedSignature.current === profileSignature) return;
+
+    if (attemptedSignature.current !== profileSignature) {
+      attemptedSignature.current = profileSignature;
+      retryAttempt.current = 0;
+      if (retryTimer.current !== null) window.clearTimeout(retryTimer.current);
+    }
+
+    let cancelled = false;
+
+    // Clerk's embedded profile editor has no save callback. Waiting briefly
+    // here means this effect runs only after useUser exposes the new resource.
+    const syncTimer = window.setTimeout(async () => {
+      setIsSyncing(true);
+
+      try {
+        // Clerk's editor owns and awaits setProfileImage. Once useUser reports
+        // the change, reload to discard any preview/stale resource and prefer
+        // the final UserResource returned by Clerk.
+        const refreshedUser = await user.reload();
+        if (cancelled) return;
+
+        await syncOdysseyProfile({ getToken, user: refreshedUser });
+        if (cancelled) return;
+
+        const refreshedSignature = getOdysseyProfileSignature(refreshedUser);
+        lastSyncedSignature.current = refreshedSignature;
+        attemptedSignature.current = refreshedSignature;
+        retryAttempt.current = 0;
+        setWarning('');
+      } catch (syncError) {
+        if (cancelled) return;
+
+        setWarning(syncError instanceof Error ? syncError.message : 'Profile synchronization failed.');
+        const delay = profileRetryDelays[Math.min(retryAttempt.current, profileRetryDelays.length - 1)];
+        retryAttempt.current += 1;
+        retryTimer.current = window.setTimeout(() => setRetryKey(value => value + 1), delay);
+      } finally {
+        if (!cancelled) setIsSyncing(false);
+      }
+    }, retryAttempt.current === 0 ? 500 : 0);
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(syncTimer);
+      if (retryTimer.current !== null) window.clearTimeout(retryTimer.current);
+    };
+  }, [enabled, getToken, profileSignature, retryKey]);
+
+  const retry = () => {
+    if (retryTimer.current !== null) window.clearTimeout(retryTimer.current);
+    setRetryKey(value => value + 1);
+  };
+
+  return { isSyncing, retry, warning };
+};
+
 const AccountManagement: React.FC = () => {
-  const { isLoaded, isSignedIn } = useUser();
+  const { isLoaded, isSignedIn, user } = useUser();
+  const { getToken } = useAuth();
   const { isLoaded: isOrganizationLoaded, organization, membership } = useOrganization();
+  const [activeTab, setActiveTab] = useState<AccountManagementTab>('overview');
   const isTeacher = isTeacherMembershipRole(membership?.role);
+  const profileSync = useOdysseyProfileSync({
+    enabled: isLoaded && Boolean(isSignedIn && user),
+    getToken,
+    user,
+  });
 
   if (!isLoaded || !isOrganizationLoaded) {
     return <AccountLoading label="Loading account" />;
@@ -214,37 +332,151 @@ const AccountManagement: React.FC = () => {
     return <RedirectToSignIn />;
   }
 
+  const displayName = user.fullName ?? user.primaryEmailAddress?.emailAddress ?? 'Ludobotics account';
+  const tabs: Array<{ id: AccountManagementTab; label: string; description: string }> = [
+    { id: 'overview', label: 'Overview', description: 'Your essential actions' },
+    { id: 'profile', label: 'Personal profile', description: 'Identity and security' },
+    { id: 'organization', label: 'Classroom', description: 'Members and invitations' },
+  ];
+
   return (
-    <div className="w-full space-y-8">
-      <ManagementPanel eyebrow="Account" title="Account management">
-        <UserProfile routing="hash" appearance={clerkAppearance} />
-      </ManagementPanel>
+    <div className="w-full space-y-6">
+      {profileSync.warning && (
+        <div role="alert" className="flex flex-col gap-4 rounded-xl border border-ludo-orange/35 bg-ludo-orange/10 p-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-start gap-3">
+            <AlertTriangle size={18} className="mt-0.5 shrink-0 text-ludo-orange" />
+            <div>
+              <strong className="font-grotesk text-sm text-white">Your Clerk profile is safe.</strong>
+              <p className="mt-1 font-grotesk text-xs leading-relaxed text-white/60">
+                Odyssey has not received the latest profile yet. We will retry automatically; you can also retry now.
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={profileSync.retry}
+            disabled={profileSync.isSyncing}
+            className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg border border-ludo-orange/40 px-4 py-2 font-mono text-[10px] uppercase tracking-widest text-ludo-orange transition-colors hover:bg-ludo-orange/10 disabled:cursor-wait disabled:opacity-60"
+          >
+            <RefreshCw size={14} className={profileSync.isSyncing ? 'animate-spin' : ''} />
+            {profileSync.isSyncing ? 'Retrying' : 'Retry now'}
+          </button>
+        </div>
+      )}
+      <section className="overflow-hidden rounded-2xl border border-ludo-cyan/25 bg-[#06101d]/95 shadow-[0_0_50px_rgba(0,255,255,0.08)]">
+        <div className="border-b border-white/10 bg-gradient-to-r from-ludo-cyan/[0.08] to-ludo-blue/[0.04] p-6 md:p-8">
+          <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
+            <div>
+              <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-ludo-cyan">Account workspace</span>
+              <h2 className="mt-3 font-orbitron text-2xl font-bold text-white">Welcome, {displayName}</h2>
+              <p className="mt-2 font-grotesk text-sm text-white/55">
+                {organization ? `${organization.name} · ${formatMembershipRole(membership?.role ?? 'member')}` : 'Choose or create an organization to begin.'}
+              </p>
+            </div>
+            {organization && (
+              <OrganizationSwitcher
+                hidePersonal
+                createOrganizationUrl="/organization/create"
+                createOrganizationMode="navigation"
+                organizationProfileUrl="/account/manage"
+                organizationProfileMode="navigation"
+                afterSelectOrganizationUrl="/account/manage"
+                appearance={organizationSwitcherAppearance}
+              />
+            )}
+          </div>
+        </div>
 
-      <SignOutPanel />
+        <nav aria-label="Account sections" className="grid grid-cols-1 gap-2 border-b border-white/10 p-3 sm:grid-cols-3">
+          {tabs.map(tab => (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => setActiveTab(tab.id)}
+              className={`rounded-xl border px-4 py-3 text-left transition-colors ${activeTab === tab.id ? 'border-ludo-cyan/40 bg-ludo-cyan/10' : 'border-transparent hover:border-white/10 hover:bg-white/[0.035]'}`}
+            >
+              <span className={`block font-orbitron text-xs font-bold ${activeTab === tab.id ? 'text-ludo-cyan' : 'text-white/70'}`}>{tab.label}</span>
+              <span className="mt-1 block font-grotesk text-[11px] text-white/40">{tab.description}</span>
+            </button>
+          ))}
+        </nav>
+      </section>
 
-      <LauncherDownloadPanel />
-
-      {organization ? (
-        isTeacher ? (
-          <TeacherOrganizationSection
-            organizationName={organization.name}
-            role={membership?.role}
+      {activeTab === 'overview' && (
+        <>
+        <div className="grid gap-5 lg:grid-cols-2">
+          {isTeacher && organization && (
+            <AccountActionCard
+              eyebrow="Classroom intelligence"
+              title="Teacher dashboard"
+              description="Review live progress, command accuracy, mistakes, and requests for help."
+              href="/account/teacher/dashboard"
+              action="Open dashboard"
+              featured
+            />
+          )}
+          <AccountActionCard
+            eyebrow="The Odyssey"
+            title="Launcher client"
+            description="Download the launcher used to install, update, and enter The Odyssey."
+            href={launcherDownloadPath}
+            action="Download client"
           />
+        </div>
+        <div className="mt-5"><SignOutPanel /></div>
+        </>
+      )}
+
+      {activeTab === 'profile' && (
+        <div className="space-y-5">
+          <ManagementPanel eyebrow="Personal settings" title="Profile and security">
+            <UserProfile routing="hash" appearance={clerkAppearance} />
+          </ManagementPanel>
+          <SignOutPanel />
+        </div>
+      )}
+
+      {activeTab === 'organization' && (
+        organization ? (
+          isTeacher ? (
+            <TeacherOrganizationSection organizationName={organization.name} role={membership?.role} />
+          ) : (
+            <OrganizationMemberSummary organizationName={organization.name} role={membership?.role} />
+          )
         ) : (
-          <OrganizationMemberSummary organizationName={organization.name} role={membership?.role} />
+          <ManagementPanel eyebrow="Classroom" title="Select an organization">
+            <OrganizationList
+              hidePersonal
+              afterCreateOrganizationUrl="/account/manage"
+              afterSelectOrganizationUrl="/account/manage"
+              appearance={clerkAppearance}
+            />
+          </ManagementPanel>
         )
-      ) : (
-        <ManagementPanel eyebrow="Organization" title="No active organization">
-          <OrganizationList
-            hidePersonal
-            afterCreateOrganizationUrl="/account/manage"
-            afterSelectOrganizationUrl="/account/manage"
-            appearance={clerkAppearance}
-          />
-        </ManagementPanel>
       )}
     </div>
   );
+};
+
+const AccountActionCard: React.FC<{
+  eyebrow: string;
+  title: string;
+  description: string;
+  action: string;
+  href?: string;
+  onClick?: () => void;
+  featured?: boolean;
+}> = ({ eyebrow, title, description, action, href, onClick, featured = false }) => {
+  const className = `group flex min-h-56 flex-col rounded-2xl border p-6 text-left transition-all ${featured ? 'border-ludo-cyan/40 bg-gradient-to-br from-ludo-cyan/10 to-ludo-blue/5 hover:border-ludo-cyan' : 'border-white/10 bg-ludo-panel hover:border-ludo-cyan/45'}`;
+  const content = (
+    <>
+      <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-ludo-cyan">{eyebrow}</span>
+      <h3 className="mt-4 font-orbitron text-xl font-bold text-white">{title}</h3>
+      <p className="mt-3 flex-1 font-grotesk text-sm leading-relaxed text-white/55">{description}</p>
+      <span className="mt-6 font-orbitron text-xs uppercase tracking-widest text-ludo-cyan transition-transform group-hover:translate-x-1">{action} →</span>
+    </>
+  );
+  return href ? <a href={href} className={className}>{content}</a> : <button type="button" onClick={onClick} className={className}>{content}</button>;
 };
 
 const ProtectedOrganizationCreate: React.FC = () => {
@@ -292,7 +524,13 @@ const TeacherOrganizationSection: React.FC<{
               <p className="font-mono text-xs text-white/75 mt-3 uppercase tracking-widest">Role: {formatMembershipRole(role)}</p>
             )}
           </div>
-          <div className="flex justify-start md:justify-end">
+          <div className="flex flex-wrap items-center justify-start gap-3 md:justify-end">
+            <a
+              href="/account/teacher/dashboard"
+              className="inline-flex items-center justify-center border border-ludo-cyan bg-ludo-cyan px-4 py-2.5 font-orbitron text-xs uppercase tracking-widest text-ludo-deep transition-colors hover:bg-transparent hover:text-ludo-cyan"
+            >
+              Open dashboard
+            </a>
             <OrganizationSwitcher
               hidePersonal
               createOrganizationUrl="/organization/create"
@@ -300,14 +538,13 @@ const TeacherOrganizationSection: React.FC<{
               organizationProfileUrl="/account/manage"
               organizationProfileMode="navigation"
               afterSelectOrganizationUrl="/account/manage"
-              appearance={clerkAppearance}
+              appearance={organizationSwitcherAppearance}
             />
           </div>
         </div>
       </div>
       <OrganizationProfile
-        routing="path"
-        path="/account/manage"
+        routing="hash"
         afterLeaveOrganizationUrl="/account/manage"
         appearance={clerkAppearance}
       />
@@ -329,7 +566,7 @@ const SignOutPanel: React.FC = () => (
     <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
       <div>
         <span className="font-mono text-xs text-ludo-cyan uppercase tracking-widest">Session</span>
-        <h2 className="font-orbitron text-2xl text-white font-bold mt-2">Disconnect account</h2>
+        <h2 className="font-orbitron text-2xl text-white font-bold mt-2">Log out of account</h2>
         <p className="font-grotesk text-white/75 text-sm mt-1">
           Sign out of this browser and return to the account sign-in page.
         </p>
@@ -339,7 +576,7 @@ const SignOutPanel: React.FC = () => (
           type="button"
           className="inline-flex items-center justify-center border border-ludo-orange/70 text-ludo-orange px-5 py-3 font-orbitron text-sm uppercase tracking-widest hover:bg-ludo-orange hover:text-ludo-deep transition-colors"
         >
-          Disconnect
+          Log out
         </button>
       </SignOutButton>
     </div>
@@ -453,6 +690,29 @@ const ClerkTextOverrides: React.FC = () => (
       color: #020810 !important;
     }
 
+    .cl-formFieldInput:not([autocomplete="one-time-code"]):not([inputmode="numeric"]),
+    .cl-formFieldInput:not([autocomplete="one-time-code"]):not([inputmode="numeric"]):focus {
+      background: #ffffff !important;
+      color: #020810 !important;
+      -webkit-text-fill-color: #020810 !important;
+    }
+
+    .cl-formFieldInput:not([autocomplete="one-time-code"]):not([inputmode="numeric"])::placeholder {
+      color: #64748b !important;
+      -webkit-text-fill-color: #64748b !important;
+      opacity: 1 !important;
+    }
+
+    .clerk-account-surface [class*="formFieldInput"]:not([autocomplete="one-time-code"]),
+    .clerk-account-surface [class*="formFieldInput"]:not([autocomplete="one-time-code"]) *,
+    .clerk-account-surface [class*="tagInput"],
+    .clerk-account-surface [class*="tagInput"] *,
+    .clerk-account-surface [class*="TagInput"],
+    .clerk-account-surface [class*="TagInput"] * {
+      color: #020810 !important;
+      -webkit-text-fill-color: #020810 !important;
+    }
+
     .clerk-account-surface input[autocomplete="one-time-code"],
     .clerk-account-surface input[inputmode="numeric"] {
       color: transparent !important;
@@ -510,6 +770,38 @@ const ClerkTextOverrides: React.FC = () => (
       color: #ffffff !important;
     }
 
+    .clerk-account-surface .cl-navbarButton,
+    .clerk-account-surface .cl-navbarButton *,
+    .clerk-account-surface .cl-menuButton,
+    .clerk-account-surface .cl-menuButton * {
+      color: rgba(255, 255, 255, 0.92) !important;
+      -webkit-text-fill-color: rgba(255, 255, 255, 0.92) !important;
+    }
+
+    .clerk-account-surface .cl-navbarButton:hover,
+    .clerk-account-surface .cl-navbarButton:hover *,
+    .clerk-account-surface .cl-menuButton:hover,
+    .clerk-account-surface .cl-menuButton:hover * {
+      color: #00ffff !important;
+      -webkit-text-fill-color: #00ffff !important;
+    }
+
+    .cl-organizationSwitcherPopoverCard,
+    .cl-organizationSwitcherPopoverCard p,
+    .cl-organizationSwitcherPopoverCard span,
+    .cl-organizationSwitcherPopoverCard button,
+    .cl-organizationSwitcherPopoverCard [class*="Identifier"],
+    .cl-organizationSwitcherPopoverCard [class*="ButtonText"] {
+      color: rgba(255, 255, 255, 0.92) !important;
+      -webkit-text-fill-color: rgba(255, 255, 255, 0.92) !important;
+    }
+
+    .cl-organizationSwitcherPopoverCard button:hover,
+    .cl-organizationSwitcherPopoverCard button:hover * {
+      color: #00ffff !important;
+      -webkit-text-fill-color: #00ffff !important;
+    }
+
     .clerk-account-surface .cl-footerActionLink,
     .clerk-account-surface .cl-formResendCodeLink,
     .clerk-account-surface .cl-breadcrumbsItem,
@@ -536,12 +828,16 @@ const getRouteLabel = (path: string) => {
 };
 
 const getRouteDescription = (path: string) => {
-  if (path.startsWith('/account/manage')) {
-    return 'Manage your Ludobotics account first, then review your organization access on the same page.';
+  if (path.startsWith('/account/teacher/dashboard')) {
+    return 'Live progress, command accuracy, mistakes, and help signals from students in your active organization.';
   }
 
-  if (path.startsWith('/account/teacher') || path === '/account/sign-up') {
-    return 'Teachers create a Ludobotics account first, then create an organization for their classroom or training group.';
+  if (path.startsWith('/account/manage')) {
+    return '';
+  }
+
+  if (path.startsWith('/account/teacher/sign-up') || path === '/account/sign-up') {
+    return 'This page is for teachers creating an account for a new organization. If your organization already has an account, please request an invitation from its administrator.';
   }
 
   if (path.startsWith('/account/student')) {
