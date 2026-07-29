@@ -8,12 +8,12 @@ import {
   SignIn,
   SignOutButton,
   SignUp,
-  UserProfile,
   useAuth,
+  UserProfile,
   useOrganization,
   useUser,
 } from '@clerk/react';
-import { AlertTriangle, ArrowLeft, RefreshCw } from 'lucide-react';
+import { AlertTriangle, ArrowLeft, Play, RefreshCw, Square } from 'lucide-react';
 import { Section } from './ui/Section';
 import { TeacherDashboardPage } from './TeacherDashboardPage';
 import {
@@ -405,6 +405,7 @@ const AccountManagement: React.FC = () => {
 
       {activeTab === 'overview' && (
         <>
+        <CloudPlayPanel />
         <div className="grid gap-5 lg:grid-cols-2">
           {isTeacher && organization && (
             <AccountActionCard
@@ -622,6 +623,291 @@ const LauncherDownloadPanel: React.FC = () => (
     </div>
   </section>
 );
+
+type CloudSessionState =
+  | 'requested'
+  | 'waiting_for_capacity'
+  | 'reserved'
+  | 'provisioning'
+  | 'ready'
+  | 'connecting'
+  | 'active'
+  | 'termination_requested'
+  | 'terminating'
+  | 'terminated'
+  | 'failed'
+  | 'expired';
+
+interface CloudSession {
+  public_session_id: string;
+  state: CloudSessionState;
+  runtime_profile: string;
+  requested_at: string;
+  updated_at: string;
+  expires_at: string;
+  failure_code?: string | null;
+  safe_failure_message?: string | null;
+}
+
+const backendBaseUrl = String(
+  import.meta.env.VITE_ODYSSEY_BACKEND_BASE_URL
+    ?? import.meta.env.VITE_ODYSSEY_BACKEND_URL
+    ?? '',
+).replace(/\/$/, '');
+
+const CloudPlayPanel: React.FC = () => {
+  const { getToken } = useAuth();
+  const [session, setSession] = React.useState<CloudSession | null>(null);
+  const [statusText, setStatusText] = React.useState('Checking cloud access');
+  const [isBusy, setIsBusy] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
+  const [stoppingSessionId, setStoppingSessionId] = React.useState<string | null>(null);
+  const launchKeyRef = React.useRef(`website-${randomId()}`);
+
+  const requestBackend = React.useCallback(
+    async (path: string, init: RequestInit = {}) => {
+      const token = await getToken();
+      if (!token) {
+        throw new Error('Sign in to launch Odyssey online.');
+      }
+      const response = await fetch(`${backendBaseUrl}${path}`, {
+        ...init,
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: 'application/json',
+          ...(init.body ? { 'Content-Type': 'application/json' } : {}),
+          ...init.headers,
+        },
+      });
+      if (response.status === 404) {
+        return null;
+      }
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(cloudErrorMessage(response.status, payload));
+      }
+      return payload;
+    },
+    [getToken],
+  );
+
+  const refreshSession = React.useCallback(async () => {
+    setError(null);
+    try {
+      const payload = await requestBackend('/cloud/sessions/current');
+      const nextSession = payload?.session ?? null;
+      setSession(nextSession);
+      if (
+        !nextSession
+        || ['terminated', 'failed', 'expired'].includes(nextSession.state)
+        || nextSession.public_session_id !== stoppingSessionId
+      ) {
+        setStoppingSessionId(null);
+      }
+      setStatusText(nextSession ? publicCloudStatus(nextSession) : 'No active cloud session');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Cloud session status is unavailable.');
+      setStatusText('Cloud session status unavailable');
+    }
+  }, [requestBackend, stoppingSessionId]);
+
+  React.useEffect(() => {
+    void refreshSession();
+  }, [refreshSession]);
+
+  React.useEffect(() => {
+    if (!session || ['failed', 'terminated', 'expired'].includes(session.state)) {
+      return undefined;
+    }
+    if (['ready', 'active'].includes(session.state) && stoppingSessionId !== session.public_session_id) {
+      return undefined;
+    }
+    const timer = window.setInterval(() => {
+      void refreshSession();
+    }, 2500);
+    return () => window.clearInterval(timer);
+  }, [refreshSession, session, stoppingSessionId]);
+
+  const launch = async () => {
+    setIsBusy(true);
+    setError(null);
+    try {
+      const payload = await requestBackend('/cloud/sessions', {
+        method: 'POST',
+        headers: { 'Idempotency-Key': launchKeyRef.current },
+        body: JSON.stringify({ runtime_profile: 'cloud' }),
+      });
+      const nextSession = payload.session as CloudSession;
+      setSession(nextSession);
+      setStatusText(publicCloudStatus(nextSession));
+      if (nextSession.state === 'ready' || nextSession.state === 'active') {
+        await openLaunchUrl(nextSession);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Odyssey cloud launch failed.');
+    } finally {
+      setIsBusy(false);
+    }
+  };
+
+  const openLaunchUrl = async (targetSession: CloudSession = session as CloudSession) => {
+    if (!targetSession) {
+      return;
+    }
+    setIsBusy(true);
+    setError(null);
+    try {
+      const payload = await requestBackend(`/cloud/sessions/${targetSession.public_session_id}/launch-ticket`, {
+        method: 'POST',
+      });
+      const launchUrl = payload.launch_url as string;
+      if (!launchUrl || (!launchUrl.startsWith('/cloud/session/') && !launchUrl.startsWith('http'))) {
+        throw new Error('Cloud launch URL was not issued.');
+      }
+      window.location.assign(launchUrl);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Cloud session is not ready yet.');
+    } finally {
+      setIsBusy(false);
+    }
+  };
+
+  const terminate = async () => {
+    if (!session) {
+      return;
+    }
+    setIsBusy(true);
+    setError(null);
+    setStoppingSessionId(session.public_session_id);
+    setSession({ ...session, state: 'termination_requested' });
+    setStatusText('Stopping your Odyssey cloud session.');
+    try {
+      const payload = await requestBackend(`/cloud/sessions/${session.public_session_id}/terminate`, {
+        method: 'POST',
+      });
+      const nextSession = payload.session as CloudSession;
+      setSession(nextSession);
+      setStatusText(publicCloudStatus(nextSession));
+      if (['terminated', 'failed', 'expired'].includes(nextSession.state)) {
+        setStoppingSessionId(null);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Cloud session termination failed.');
+      setStoppingSessionId(null);
+      await refreshSession();
+    } finally {
+      setIsBusy(false);
+    }
+  };
+
+  const isStopping = Boolean(
+    session
+    && (
+      ['termination_requested', 'terminating'].includes(session.state)
+      || stoppingSessionId === session.public_session_id
+    ),
+  );
+  const canOpen = Boolean(session && (session.state === 'ready' || session.state === 'active') && !isStopping);
+  const canTerminate = Boolean(session && !isStopping && !['terminated', 'failed', 'expired'].includes(session.state));
+  const isPending = Boolean(session && ['requested', 'waiting_for_capacity', 'reserved', 'provisioning'].includes(session.state));
+  const isLaunchBlocked = isBusy || isPending || isStopping;
+
+  return (
+    <section className="bg-ludo-panel border border-ludo-cyan/30 rounded-xl p-5" aria-live="polite">
+      <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
+        <div>
+          <span className="font-mono text-xs text-ludo-cyan uppercase tracking-widest">Cloud play</span>
+          <h2 className="font-orbitron text-2xl text-white font-bold mt-2">Launch Odyssey online</h2>
+          <p className="font-grotesk text-white/75 text-sm mt-1">{statusText}</p>
+          {error && <p className="font-grotesk text-ludo-orange text-sm mt-3">{error}</p>}
+          {session?.public_session_id && (
+            <p className="font-mono text-xs text-white/60 mt-3">Session {session.public_session_id}</p>
+          )}
+        </div>
+        <div className="flex flex-col gap-3 sm:flex-row">
+          {canOpen ? (
+            <button
+              type="button"
+              onClick={() => void openLaunchUrl()}
+              disabled={isBusy}
+              className="inline-flex items-center justify-center gap-2 border border-ludo-cyan bg-ludo-cyan text-ludo-deep px-5 py-3 font-orbitron text-sm uppercase tracking-widest hover:bg-transparent hover:text-ludo-cyan transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+              aria-label="Open Odyssey cloud session"
+            >
+              <Play size={16} /> Open session
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => void launch()}
+              disabled={isLaunchBlocked}
+              className="inline-flex items-center justify-center gap-2 border border-ludo-cyan bg-ludo-cyan text-ludo-deep px-5 py-3 font-orbitron text-sm uppercase tracking-widest hover:bg-transparent hover:text-ludo-cyan transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+              aria-label="Start Odyssey cloud session"
+            >
+              <Play size={16} /> {isStopping ? 'Stopping' : isPending ? 'Starting' : 'Play online'}
+            </button>
+          )}
+          {canTerminate && (
+            <button
+              type="button"
+              onClick={() => void terminate()}
+              disabled={isBusy}
+              className="inline-flex items-center justify-center gap-2 border border-ludo-orange/70 text-ludo-orange px-5 py-3 font-orbitron text-sm uppercase tracking-widest hover:bg-ludo-orange hover:text-ludo-deep transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+              aria-label="Terminate Odyssey cloud session"
+            >
+              <Square size={16} /> Stop
+            </button>
+          )}
+        </div>
+      </div>
+    </section>
+  );
+};
+
+const randomId = () => {
+  if (globalThis.crypto?.randomUUID) {
+    return globalThis.crypto.randomUUID();
+  }
+  return Math.random().toString(36).slice(2);
+};
+
+const publicCloudStatus = (session: CloudSession) => {
+  if (session.state === 'requested' || session.state === 'waiting_for_capacity') {
+    return 'Waiting for a cloud runtime slot.';
+  }
+  if (session.state === 'reserved' || session.state === 'provisioning') {
+    return 'Preparing the Odyssey cloud runtime.';
+  }
+  if (session.state === 'ready') {
+    return 'Your Odyssey cloud session is ready.';
+  }
+  if (session.state === 'connecting' || session.state === 'active') {
+    return 'Your Odyssey cloud session is active.';
+  }
+  if (session.state === 'termination_requested' || session.state === 'terminating') {
+    return 'Stopping your Odyssey cloud session.';
+  }
+  if (session.state === 'failed') {
+    return session.safe_failure_message ?? 'The cloud session failed.';
+  }
+  return 'No active cloud session';
+};
+
+const cloudErrorMessage = (statusCode: number, payload: unknown) => {
+  if (statusCode === 401) {
+    return 'Sign in to launch Odyssey online.';
+  }
+  if (statusCode === 403) {
+    return 'Cloud play is not available for this account yet.';
+  }
+  if (statusCode === 409) {
+    return 'Cloud session is still preparing. Try opening it again in a moment.';
+  }
+  if (statusCode === 429) {
+    return 'Too many launch attempts. Wait a moment and try again.';
+  }
+  const detail = typeof payload === 'object' && payload && 'detail' in payload ? (payload as { detail?: unknown }).detail : null;
+  return typeof detail === 'string' ? detail : 'Odyssey cloud is temporarily unavailable.';
+};
 
 const OrganizationMemberSummary: React.FC<{ organizationName: string; role?: string | null }> = ({ organizationName, role }) => {
   const isStudent = isStudentMembershipRole(role);
