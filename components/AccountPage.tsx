@@ -663,6 +663,8 @@ const CloudPlayPanel: React.FC = () => {
   const [error, setError] = React.useState<string | null>(null);
   const [stoppingSessionId, setStoppingSessionId] = React.useState<string | null>(null);
   const launchKeyRef = React.useRef(`website-${randomId()}`);
+  const refreshRequestRef = React.useRef(0);
+  const sessionRef = React.useRef<CloudSession | null>(null);
 
   const requestBackend = React.useCallback(
     async (path: string, init: RequestInit = {}) => {
@@ -692,20 +694,29 @@ const CloudPlayPanel: React.FC = () => {
   );
 
   const refreshSession = React.useCallback(async () => {
+    const requestId = ++refreshRequestRef.current;
     setError(null);
     try {
       const payload = await requestBackend('/cloud/sessions/current');
+      if (requestId !== refreshRequestRef.current) return;
       const nextSession = payload?.session ?? null;
+      sessionRef.current = nextSession;
       setSession(nextSession);
-      if (
-        !nextSession
-        || ['terminated', 'failed', 'expired'].includes(nextSession.state)
-        || nextSession.public_session_id !== stoppingSessionId
-      ) {
+      if (!nextSession || ['terminated', 'failed', 'expired'].includes(nextSession.state)) {
+        launchKeyRef.current = `website-${randomId()}`;
+      }
+      if (!nextSession || ['terminated', 'failed', 'expired'].includes(nextSession.state) || nextSession.public_session_id !== stoppingSessionId) {
         setStoppingSessionId(null);
       }
       setStatusText(nextSession ? publicCloudStatus(nextSession) : 'No active cloud session');
     } catch (err) {
+      if (requestId !== refreshRequestRef.current) return;
+      const currentSession = sessionRef.current;
+      if (currentSession && ['ready', 'active'].includes(currentSession.state)) {
+        setError(null);
+        setStatusText(publicCloudStatus(currentSession));
+        return;
+      }
       setError(err instanceof Error ? err.message : 'Cloud session status is unavailable.');
       setStatusText('Cloud session status unavailable');
     }
@@ -729,6 +740,7 @@ const CloudPlayPanel: React.FC = () => {
   }, [refreshSession, session, stoppingSessionId]);
 
   const launch = async () => {
+    refreshRequestRef.current += 1;
     setIsBusy(true);
     setError(null);
     try {
@@ -738,6 +750,7 @@ const CloudPlayPanel: React.FC = () => {
         body: JSON.stringify({ runtime_profile: 'cloud' }),
       });
       const nextSession = payload.session as CloudSession;
+      sessionRef.current = nextSession;
       setSession(nextSession);
       setStatusText(publicCloudStatus(nextSession));
       if (nextSession.state === 'ready' || nextSession.state === 'active') {
@@ -786,6 +799,7 @@ const CloudPlayPanel: React.FC = () => {
         method: 'POST',
       });
       const nextSession = payload.session as CloudSession;
+      sessionRef.current = nextSession;
       setSession(nextSession);
       setStatusText(publicCloudStatus(nextSession));
       if (['terminated', 'failed', 'expired'].includes(nextSession.state)) {
