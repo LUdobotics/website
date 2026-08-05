@@ -15,6 +15,7 @@ import { CarouselModal } from './components/CarouselModal';
 import { TRDPage } from './components/TRDPage';
 import { LauncherDownloadStudent } from './components/LauncherDownloadStudent';
 import { AccountPage, isAccountPath, isOrganizationPath } from './components/AccountPage';
+import { AdminPage } from './components/admin/AdminPage';
 
 interface AppProps {
   isClerkConfigured: boolean;
@@ -38,6 +39,10 @@ function App({ isClerkConfigured }: AppProps) {
 
   if (isAccountPath(path) || isOrganizationPath(path)) {
     return <AccountPage path={path} isClerkConfigured={isClerkConfigured} />;
+  }
+
+  if (path === '/admin' || path.startsWith('/admin/')) {
+    return <AdminPage />;
   }
 
   if (view === 'trd') {

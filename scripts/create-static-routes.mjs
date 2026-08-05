@@ -16,6 +16,14 @@ const routes = [
   'organization/manage',
   'launcher_download_client',
   'launcher_download_student',
+  'admin',
+  'admin/users',
+  'admin/organisations',
+  'admin/licences',
+  'admin/subscriptions',
+  'admin/usage',
+  'admin/cloud',
+  'admin/audit',
 ];
 
 await copyFile('dist/index.html', 'dist/404.html');
