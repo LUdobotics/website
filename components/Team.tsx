@@ -1,13 +1,17 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Braces, BriefcaseBusiness, Cpu, Linkedin, Rocket, UserRound, Users } from 'lucide-react';
+import { Braces, BriefcaseBusiness, Cpu, Linkedin, Rocket, Users } from 'lucide-react';
 import { Section } from './ui/Section';
+import davePortrait from '../assets/team/dave.webp';
+import loickPortrait from '../assets/team/loick.webp';
+import miguelPortrait from '../assets/team/miguel.webp';
+import rishekeshPortrait from '../assets/team/rishekesh.webp';
 
 const team = [
   {
     name: 'Dr. Loïck Chovet',
     role: 'CEO/CTO and Co-Founder',
-    initials: 'LC',
+    portrait: loickPortrait,
     icon: Rocket,
     accent: 'from-ludo-cyan/30 via-ludo-blue/15 to-transparent',
     linkedin: 'https://www.linkedin.com/in/lo%C3%AFck-chovet-0a8a13180/',
@@ -15,7 +19,7 @@ const team = [
   {
     name: 'Rishekesh Ramesh',
     role: 'COO and Co-Founder',
-    initials: 'RR',
+    portrait: rishekeshPortrait,
     icon: BriefcaseBusiness,
     accent: 'from-ludo-blue/35 via-ludo-magenta/10 to-transparent',
     linkedin: 'https://www.linkedin.com/in/rishekesh-ramesh-716b50197/',
@@ -23,7 +27,7 @@ const team = [
   {
     name: 'Prof. Dr. Miguel Olivares Mendez',
     role: 'Chief Roboticist and Co-Founder',
-    initials: 'MM',
+    portrait: miguelPortrait,
     icon: Users,
     accent: 'from-ludo-magenta/25 via-ludo-blue/15 to-transparent',
     linkedin: 'https://www.linkedin.com/in/miguel-olivares-mendez-8a952533/',
@@ -31,7 +35,7 @@ const team = [
   {
     name: 'Dr. Dave van der Meer',
     role: 'Game Robotic Engineer',
-    initials: 'DM',
+    portrait: davePortrait,
     icon: Braces,
     accent: 'from-ludo-green/25 via-ludo-cyan/10 to-transparent',
     linkedin: 'https://www.linkedin.com/in/dave-van-der-meer/',
@@ -68,14 +72,14 @@ export const Team: React.FC = () => (
           >
             <div className={`relative flex aspect-[4/3] items-center justify-center overflow-hidden bg-gradient-to-br ${member.accent}`}>
               <div className="absolute inset-0 opacity-30 [background-image:linear-gradient(rgba(255,255,255,.08)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.08)_1px,transparent_1px)] [background-size:28px_28px]" />
-              <div role="img" aria-label={`Placeholder portrait for ${member.name}`} className="relative flex h-28 w-28 items-center justify-center rounded-full border border-white/20 bg-ludo-deep/75 shadow-[0_0_45px_rgba(0,255,255,0.12)] backdrop-blur-sm">
-                <UserRound size={42} className="absolute text-white/15" />
-                <span className="mt-16 font-mono text-xs font-bold tracking-[0.2em] text-ludo-cyan">{member.initials}</span>
-              </div>
+              <img
+                src={member.portrait}
+                alt={`Portrait of ${member.name}`}
+                className="relative h-full w-full object-contain px-3 pt-3 transition duration-500 group-hover:scale-[1.03]"
+              />
               <span className="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 bg-ludo-deep/60 text-white/45 backdrop-blur-sm transition group-hover:border-ludo-cyan/30 group-hover:text-ludo-cyan">
                 <member.icon size={17} />
               </span>
-              <span className="absolute bottom-3 left-4 font-mono text-[8px] uppercase tracking-[0.22em] text-white/30">Portrait coming soon</span>
             </div>
             <div className="flex min-h-44 flex-col p-5">
               <h3 className="font-orbitron text-base font-bold leading-snug text-white">{member.name}</h3>
