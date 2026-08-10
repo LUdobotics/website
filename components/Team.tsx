@@ -75,7 +75,7 @@ export const Team: React.FC = () => (
               <img
                 src={member.portrait}
                 alt={`Portrait of ${member.name}`}
-                className="relative h-full w-full object-contain px-3 pt-3 transition duration-500 group-hover:scale-[1.03]"
+                className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"
               />
               <span className="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 bg-ludo-deep/60 text-white/45 backdrop-blur-sm transition group-hover:border-ludo-cyan/30 group-hover:text-ludo-cyan">
                 <member.icon size={17} />
