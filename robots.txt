@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /account
+Disallow: /organization
+Disallow: /admin
+
+Sitemap: https://ludobotics.com/sitemap.xml
