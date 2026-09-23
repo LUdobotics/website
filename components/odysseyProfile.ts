@@ -1,5 +1,25 @@
 export const odysseyBackendUrl = String(import.meta.env.VITE_ODYSSEY_BACKEND_URL ?? '').replace(/\/$/, '');
 
+export interface OdysseyAccess {
+  clerk_organisation_id?: string | null;
+  organisation_has_cloud_pool?: boolean;
+}
+
+export async function getOdysseyAccess(
+  getToken: (options?: { skipCache?: boolean }) => Promise<string | null>,
+): Promise<OdysseyAccess> {
+  // Organization activation changes the org claims in Clerk's session token.
+  // Force a fresh token so onboarding doesn't make its routing decision from
+  // the previous organization context cached during invitation acceptance.
+  const token = await getToken({ skipCache: true });
+  if (!token) throw new Error('Missing Clerk session token. Please sign in again.');
+  const response = await fetch(`${odysseyBackendUrl}/me/access`, {
+    headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
+  });
+  if (!response.ok) throw new Error(`Odyssey access could not be checked (${response.status}).`);
+  return response.json() as Promise<OdysseyAccess>;
+}
+
 export interface OdysseyProfileUser {
   id: string;
   username: string | null;

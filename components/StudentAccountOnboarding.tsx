@@ -16,7 +16,7 @@ import {
   isStudentMembershipRole,
   shouldExitActiveSessionForInvitation,
 } from './accountLifecycle';
-import { odysseyBackendUrl, syncOdysseyProfile } from './odysseyProfile';
+import { getOdysseyAccess, odysseyBackendUrl, syncOdysseyProfile } from './odysseyProfile';
 
 const onboardingPath = '/account/student/onboarding';
 const invitationOnboardingPath = `${onboardingPath}?source=invitation`;
@@ -154,6 +154,7 @@ export const StudentOnboarding: React.FC = () => {
   const [isSettingPassword, setIsSettingPassword] = useState(false);
   const [readiness, setReadiness] = useState<ReadinessState>('waiting');
   const [readinessError, setReadinessError] = useState('');
+  const [organisationHasCloudPool, setOrganisationHasCloudPool] = useState(false);
 
   const studentMemberships = useMemo(
     () => (userMemberships.data ?? []).filter(item => isStudentMembershipRole(item.role)),
@@ -207,12 +208,29 @@ export const StudentOnboarding: React.FC = () => {
     try {
       const refreshedUser = await user.reload();
       await syncOdysseyProfile({ getToken, user: refreshedUser });
+      if (!organization?.id) {
+        throw new Error('The invited classroom is not active yet. Retry verification in a moment.');
+      }
+
+      let access = await getOdysseyAccess(getToken);
+      if (access.clerk_organisation_id !== organization.id) {
+        // Invitation acceptance can finish before the active organization is
+        // reflected in the session token. Re-activate the confirmed classroom
+        // and fetch a fresh token before choosing the post-onboarding route.
+        await setActive({ organization: organization.id });
+        access = await getOdysseyAccess(getToken);
+      }
+      if (access.clerk_organisation_id !== organization.id) {
+        throw new Error('The active classroom could not be confirmed with Odyssey. Retry verification.');
+      }
+
+      setOrganisationHasCloudPool(access.organisation_has_cloud_pool === true);
       setReadiness('ready');
     } catch (error) {
       setReadiness('error');
       setReadinessError(error instanceof Error ? error.message : 'Odyssey access could not be verified.');
     }
-  }, [getToken, user]);
+  }, [getToken, organization?.id, setActive, user]);
 
   useEffect(() => {
     if (
@@ -356,10 +374,10 @@ export const StudentOnboarding: React.FC = () => {
         <ReadinessItem label="Odyssey profile synchronized" />
       </ul>
       <a
-        href="/launcher_download_client"
+        href={organisationHasCloudPool ? '/account/manage#/organization-members' : '/launcher_download_student'}
         className="mt-7 inline-flex items-center justify-center rounded-lg bg-ludo-cyan px-5 py-3 font-orbitron text-xs font-bold uppercase tracking-widest text-ludo-deep transition-colors hover:bg-white"
       >
-        Download launcher
+        {organisationHasCloudPool ? 'Open student management' : 'Download launcher'}
       </a>
     </div>
   );
