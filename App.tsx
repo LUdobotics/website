@@ -6,6 +6,7 @@ import { Solution } from './components/Solution';
 import { TeacherBenefits } from './components/TeacherBenefits';
 import { Features } from './components/Features';
 import { Impact } from './components/Impact';
+import { Supporters } from './components/Supporters';
 import { Team } from './components/Team';
 import { Roadmap } from './components/Roadmap';
 import { CTA } from './components/CTA';
@@ -61,6 +62,7 @@ function App({ isClerkConfigured }: AppProps) {
         <Impact />
         <Roadmap />
         <Team />
+        <Supporters />
         <CTA onOpenBeta={openBeta} />
       </main>
       <Footer />

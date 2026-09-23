@@ -13,7 +13,7 @@ import {
   useOrganization,
   useUser,
 } from '@clerk/react';
-import { AlertTriangle, ArrowLeft, Play, RefreshCw, Square } from 'lucide-react';
+import { AlertTriangle, ArrowLeft, Building2, Check, ChevronRight, Cloud, Download, ExternalLink, GraduationCap, LayoutDashboard, LoaderCircle, MailPlus, Play, RefreshCw, Server, Square } from 'lucide-react';
 import { Section } from './ui/Section';
 import { TeacherDashboardPage } from './TeacherDashboardPage';
 import {
@@ -81,6 +81,7 @@ const routeLabels: Record<string, string> = {
   '/account/sign-up': 'Teacher onboarding',
   '/account/teacher/sign-up': 'Teacher onboarding',
   '/account/teacher/dashboard': 'Classroom intelligence',
+  '/account/teacher/onboarding': 'Teacher onboarding',
   '/account/student/invitation': 'Student invitation',
   '/account/student/onboarding': 'Student account readiness',
   '/account/student/sign-in': 'Student sign in',
@@ -95,8 +96,9 @@ export const AccountPage: React.FC<AccountPageProps> = ({ path, isClerkConfigure
   const routeLabel = getRouteLabel(path);
   const routeDescription = getRouteDescription(path);
   const isDashboardRoute = path.startsWith('/account/teacher/dashboard');
+  const isTeacherOnboardingRoute = path.startsWith('/account/teacher/onboarding');
   const isAccountManagementRoute = path.startsWith('/account/manage');
-  const isManagementRoute = path.startsWith('/account/manage') || path.startsWith('/organization/manage') || isDashboardRoute;
+  const isManagementRoute = path.startsWith('/account/manage') || path.startsWith('/organization/manage') || isDashboardRoute || isTeacherOnboardingRoute;
   const backHref = isAccountManagementRoute ? '/' : '/account/manage';
   const backLabel = isAccountManagementRoute ? 'Back to Ludobotics' : 'Account management';
 
@@ -122,7 +124,7 @@ export const AccountPage: React.FC<AccountPageProps> = ({ path, isClerkConfigure
                 <div className="inline-flex items-center gap-2 px-3 py-1 mb-6 border border-ludo-cyan/30 rounded-full bg-ludo-cyan/5 backdrop-blur-sm">
                   <span className="w-2 h-2 rounded-full bg-ludo-green animate-pulse" />
                   <span className="font-mono text-xs text-ludo-cyan tracking-widest uppercase">
-                    {isDashboardRoute ? 'Teacher workspace' : 'Hidden account route'}
+                    {isDashboardRoute || isTeacherOnboardingRoute ? 'Teacher workspace' : 'Hidden account route'}
                   </span>
                 </div>
 
@@ -156,6 +158,10 @@ const ClerkAccountSurface: React.FC<{ path: string }> = ({ path }) => {
 
   if (path.startsWith('/account/teacher/dashboard')) {
     return <TeacherDashboardPage />;
+  }
+
+  if (path.startsWith('/account/teacher/onboarding')) {
+    return <TeacherOnboardingPage />;
   }
 
   if (path.startsWith('/account/sign-in') || path.startsWith('/account/student/sign-in')) {
@@ -319,6 +325,18 @@ const AccountManagement: React.FC = () => {
   const { isLoaded: isOrganizationLoaded, organization, membership } = useOrganization();
   const [activeTab, setActiveTab] = useState<AccountManagementTab>('overview');
   const isTeacher = isTeacherMembershipRole(membership?.role);
+
+  useEffect(() => {
+    const syncTabFromHash = () => {
+      if (window.location.hash === '#classroom') {
+        setActiveTab('organization');
+      }
+    };
+
+    syncTabFromHash();
+    window.addEventListener('hashchange', syncTabFromHash);
+    return () => window.removeEventListener('hashchange', syncTabFromHash);
+  }, []);
   const profileSync = useOdysseyProfileSync({
     enabled: isLoaded && Boolean(isSignedIn && user),
     getToken,
@@ -407,23 +425,28 @@ const AccountManagement: React.FC = () => {
         <>
         <CloudPlayPanel />
         <div className="grid gap-5 lg:grid-cols-2">
-          {isTeacher && organization && (
+          <div className="flex flex-col gap-5">
+            {isTeacher && organization && (
+              <AccountActionCard
+                eyebrow="Classroom intelligence"
+                title="Teacher dashboard"
+                description="Review live progress, command accuracy, mistakes, and requests for help."
+                href="/account/teacher/dashboard"
+                action="Open dashboard"
+                featured
+                className="flex-1"
+              />
+            )}
             <AccountActionCard
-              eyebrow="Classroom intelligence"
-              title="Teacher dashboard"
-              description="Review live progress, command accuracy, mistakes, and requests for help."
-              href="/account/teacher/dashboard"
-              action="Open dashboard"
-              featured
+              eyebrow="The Odyssey"
+              title="Launcher client"
+              description="Download the launcher used to install, update, and enter The Odyssey."
+              href={launcherDownloadPath}
+              action="Download client"
+              className="flex-1"
             />
-          )}
-          <AccountActionCard
-            eyebrow="The Odyssey"
-            title="Launcher client"
-            description="Download the launcher used to install, update, and enter The Odyssey."
-            href={launcherDownloadPath}
-            action="Download client"
-          />
+          </div>
+          {isTeacher && <TeacherOnboardingPage compact />}
         </div>
         <div className="mt-5"><SignOutPanel /></div>
         </>
@@ -460,6 +483,217 @@ const AccountManagement: React.FC = () => {
   );
 };
 
+type TeacherOnboardingCompletion = Record<string, boolean>;
+
+const TeacherOnboardingItem: React.FC<{
+  title: string;
+  description: string;
+  action: string;
+  complete: boolean;
+  disabled?: boolean;
+  icon: React.ComponentType<{ size?: number; className?: string }>;
+  onClick: () => void;
+}> = ({ title, description, action, complete, disabled = false, icon: Icon, onClick }) => (
+  <div className={`flex flex-col gap-4 rounded-xl border p-5 transition-colors sm:flex-row sm:items-center sm:justify-between ${complete ? 'border-ludo-green/50 bg-ludo-green/5' : 'border-white/10 bg-ludo-panel'}`}>
+    <div className="flex min-w-0 items-start gap-4">
+      <div className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border ${complete ? 'border-ludo-green bg-ludo-green text-ludo-deep' : 'border-ludo-cyan/50 text-ludo-cyan'}`}>
+        {complete ? <Check size={18} /> : <Icon size={18} />}
+      </div>
+      <div>
+        <h3 className="font-orbitron text-sm font-bold text-white">{title}</h3>
+        <p className="mt-1 font-grotesk text-sm leading-relaxed text-white/55">{description}</p>
+      </div>
+    </div>
+    <button
+      type="button"
+      disabled={disabled || complete}
+      onClick={onClick}
+      className="inline-flex shrink-0 items-center justify-center gap-2 border border-ludo-cyan px-4 py-2.5 font-orbitron text-[10px] uppercase tracking-widest text-ludo-cyan transition-colors hover:bg-ludo-cyan hover:text-ludo-deep disabled:cursor-not-allowed disabled:border-white/15 disabled:text-white/35 disabled:hover:bg-transparent disabled:hover:text-white/35"
+    >
+      {complete ? 'Completed' : action}
+      {!complete && <ChevronRight size={14} />}
+    </button>
+  </div>
+);
+
+const TeacherOnboardingPage: React.FC<{ compact?: boolean }> = ({ compact = false }) => {
+  const { getToken, isLoaded: isAuthLoaded, isSignedIn, orgId, orgRole } = useAuth();
+  const { isLoaded: isOrganizationLoaded, organization, invitations, memberships } = useOrganization({
+    invitations: { pageSize: 20 },
+    memberships: { pageSize: 100 },
+  });
+  const [access, setAccess] = useState<{
+    effective_pool_id?: string | null;
+    can_access_cloud?: boolean;
+  } | null>(null);
+  const [activeTab, setActiveTab] = useState<'local' | 'cloud'>('local');
+  const [completion, setCompletion] = useState<TeacherOnboardingCompletion>({});
+  const [licenceMessage, setLicenceMessage] = useState(false);
+  const isTeacher = isTeacherMembershipRole(orgRole);
+  const storageKey = `odyssey.teacher-onboarding.${orgId ?? 'none'}`;
+  const hasOrganisation = Boolean(orgId && organization);
+  const hasPool = Boolean(access?.effective_pool_id);
+  const hasCloudAccess = access?.can_access_cloud === true;
+  const hasStudentMember = (memberships?.data ?? []).some(item => isStudentMembershipRole(item.role));
+  const hasInvitation = hasStudentMember || (invitations?.data ?? []).some(item => item.status !== 'revoked' && item.status !== 'expired');
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const saved = window.localStorage.getItem(storageKey);
+    if (!saved) return;
+    try {
+      setCompletion(JSON.parse(saved) as TeacherOnboardingCompletion);
+    } catch {
+      window.localStorage.removeItem(storageKey);
+    }
+  }, [storageKey]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') window.localStorage.setItem(storageKey, JSON.stringify(completion));
+  }, [completion, storageKey]);
+
+  useEffect(() => {
+    if (hasInvitation) setCompletion(previous => ({ ...previous, invite: true }));
+  }, [hasInvitation]);
+
+  useEffect(() => {
+    if (!isAuthLoaded || !isOrganizationLoaded || !isSignedIn || !orgId || !backendBaseUrl) return;
+    let cancelled = false;
+    void getToken().then(async token => {
+      if (!token) return;
+      const response = await fetch(`${backendBaseUrl}/me/access`, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } });
+      if (!response.ok || cancelled) return;
+      setAccess(await response.json());
+    }).catch(() => undefined);
+    return () => { cancelled = true; };
+  }, [getToken, isAuthLoaded, isOrganizationLoaded, isSignedIn, orgId]);
+
+  if (!isAuthLoaded || !isOrganizationLoaded) return <AccountLoading label="Loading teacher onboarding" />;
+  if (!isSignedIn) return <RedirectToSignIn />;
+  if (!isTeacher) {
+    return (
+      <div className="w-full max-w-xl rounded-2xl border border-ludo-orange/35 bg-ludo-panel p-7">
+        <AlertTriangle size={32} className="text-ludo-orange" />
+        <h2 className="mt-5 font-orbitron text-2xl font-bold text-white">Teacher access required</h2>
+        <p className="mt-3 font-grotesk text-sm leading-relaxed text-white/65">This checklist is available to organisation teachers.</p>
+        <a href="/account/manage" className="mt-6 inline-flex border border-ludo-cyan px-5 py-3 font-orbitron text-xs uppercase tracking-widest text-ludo-cyan hover:bg-ludo-cyan hover:text-ludo-deep">Return to account</a>
+      </div>
+    );
+  }
+
+  const markAndOpen = (key: string, href: string) => {
+    setCompletion(previous => ({ ...previous, [key]: true }));
+    window.location.href = href;
+  };
+  const openClassroom = () => {
+    window.location.hash = 'classroom';
+  };
+  const completedCount = [hasOrganisation, hasPool, hasInvitation, completion.local, completion.localMonitor, hasCloudAccess && completion.cloud, hasCloudAccess && completion.cloudMonitor].filter(Boolean).length;
+  const totalCount = hasCloudAccess ? 7 : 5;
+  const compactMonitoringComplete = completion.localMonitor === true || completion.cloudMonitor === true;
+  const compactCompletedCount = [hasOrganisation, hasPool, hasInvitation, completion.local, hasCloudAccess && completion.cloud, compactMonitoringComplete].filter(Boolean).length;
+  const compactTotalCount = hasCloudAccess ? 6 : 5;
+
+  if (compact) {
+    return (
+      <section className="flex h-full flex-col rounded-2xl border border-ludo-cyan/30 bg-ludo-panel p-6">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-ludo-cyan">Teacher setup</span>
+            <h2 className="mt-3 font-orbitron text-xl font-bold text-white">Getting started</h2>
+          </div>
+          <span className="rounded-lg border border-white/10 px-3 py-2 font-mono text-xs text-white/65">{compactCompletedCount}/{compactTotalCount}</span>
+        </div>
+        <div className="mt-5 flex flex-1 flex-col justify-between gap-2 space-y-0">
+          {[
+            { key: 'organisation', label: 'Create organisation', complete: hasOrganisation, disabled: false, action: () => { window.location.href = '/organization/create'; } },
+            { key: 'pool', label: 'Get licence pool', complete: hasPool, disabled: !hasOrganisation, action: () => { if (!hasPool) setLicenceMessage(true); } },
+            { key: 'invite', label: 'Invite first students', complete: hasInvitation, disabled: !hasOrganisation || !hasPool, action: openClassroom },
+            { key: 'monitor', label: 'Monitor your students', complete: compactMonitoringComplete, disabled: !hasOrganisation || !hasPool || !hasInvitation, action: () => {
+              setCompletion(previous => ({ ...previous, localMonitor: true, ...(hasCloudAccess ? { cloudMonitor: true } : {}) }));
+              window.location.href = '/account/teacher/dashboard';
+            } },
+          ].map(item => (
+            <button
+              key={item.key}
+              type="button"
+              disabled={item.disabled || item.complete}
+              onClick={item.action}
+              className="flex w-full items-center justify-between gap-3 rounded-lg border border-white/10 px-3 py-2.5 text-left transition-colors hover:border-ludo-cyan/40 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              <span className="flex min-w-0 items-center gap-3">
+                <span className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full border ${item.complete ? 'border-ludo-green bg-ludo-green text-ludo-deep' : 'border-ludo-cyan/50 text-ludo-cyan'}`}>
+                  {item.complete ? <Check size={13} /> : <ChevronRight size={13} />}
+                </span>
+                <span className="truncate font-grotesk text-sm text-white/80">{item.label}</span>
+              </span>
+              <span className="shrink-0 font-mono text-[9px] uppercase tracking-widest text-white/35">{item.complete ? 'Done' : 'Open'}</span>
+            </button>
+          ))}
+        </div>
+        <div className="mt-4 border-t border-white/10 pt-4">
+          <span className="font-grotesk text-xs text-white/45">Play setup</span>
+          <div className="mt-3 grid gap-2 sm:grid-cols-2">
+            <button type="button" disabled={!hasOrganisation || !hasPool} onClick={() => markAndOpen('local', launcherDownloadPath)} className="rounded-lg border border-white/10 bg-white/[0.025] p-3 text-left transition-colors hover:border-ludo-cyan/45 disabled:cursor-not-allowed disabled:opacity-45">
+              <span className="flex items-center justify-between gap-2 font-orbitron text-[10px] uppercase tracking-widest text-ludo-cyan"><span>Local play</span>{completion.local ? <Check size={13} className="text-ludo-green" /> : <Download size={13} />}</span>
+              <span className="mt-2 block font-grotesk text-xs text-white/55">Install the launcher and test the game.</span>
+            </button>
+            <button type="button" disabled={!hasCloudAccess || !hasOrganisation || !hasPool} onClick={() => markAndOpen('cloud', '/account/manage#cloud-play')} className="rounded-lg border border-white/10 bg-white/[0.025] p-3 text-left transition-colors hover:border-ludo-cyan/45 disabled:cursor-not-allowed disabled:opacity-35">
+              <span className={`flex items-center justify-between gap-2 font-orbitron text-[10px] uppercase tracking-widest ${hasCloudAccess ? 'text-ludo-cyan' : 'text-white/30'}`}><span>Cloud play</span>{completion.cloud ? <Check size={13} className="text-ludo-green" /> : <Cloud size={13} />}</span>
+              <span className="mt-2 block font-grotesk text-xs text-white/55">{hasCloudAccess ? 'Launch an online session.' : 'Not included in this licence.'}</span>
+            </button>
+          </div>
+        </div>
+        {licenceMessage && <div role="alertdialog" className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-6"><div className="max-w-md rounded-2xl border border-ludo-cyan/40 bg-[#06101d] p-7 shadow-2xl"><h2 className="font-orbitron text-xl font-bold text-white">Licence pool pending</h2><p className="mt-3 font-grotesk text-sm leading-relaxed text-white/70">Please wait for our admins to assign you a licence or contact us at licenses@ludobotics.com.</p><button type="button" onClick={() => setLicenceMessage(false)} className="mt-6 border border-ludo-cyan px-5 py-2.5 font-orbitron text-xs uppercase tracking-widest text-ludo-cyan">Close</button></div></div>}
+      </section>
+    );
+  }
+
+  return (
+    <div className="w-full space-y-6">
+      <section className="rounded-2xl border border-ludo-cyan/25 bg-[#06101d]/95 p-6 shadow-[0_0_50px_rgba(0,255,255,0.08)] md:p-8">
+        <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <span className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.2em] text-ludo-cyan"><GraduationCap size={15} /> Teacher onboarding</span>
+            <h2 className="mt-3 font-orbitron text-2xl font-bold text-white md:text-3xl">Set up your Odyssey classroom</h2>
+            <p className="mt-2 max-w-2xl font-grotesk text-sm leading-relaxed text-white/55">Complete these steps to prepare your organisation, students, local launcher, cloud play, and classroom monitoring.</p>
+          </div>
+          <div className="rounded-xl border border-white/10 px-4 py-3 text-right"><span className="font-mono text-[10px] uppercase tracking-widest text-white/45">Progress</span><strong className="mt-1 block font-orbitron text-xl text-white">{completedCount} / {totalCount}</strong></div>
+        </div>
+      </section>
+
+      <section className="space-y-4 rounded-2xl border border-ludo-cyan/25 bg-[#06101d]/95 p-5 md:p-7">
+        <h3 className="font-orbitron text-lg font-bold text-white">Next steps to work with the Odyssey</h3>
+        <TeacherOnboardingItem title="Create your organisation" description="Create or select the organisation that contains your students and licence pool." action={hasOrganisation ? 'Organisation ready' : 'Open organisations'} complete={hasOrganisation} icon={Building2} onClick={() => { window.location.href = '/organization/create'; }} />
+        <TeacherOnboardingItem title="Get your licence pool" description={hasOrganisation ? 'Licence pools are assigned manually for this round.' : 'Create your organisation first.'} action={hasPool ? 'Licence pool ready' : 'Check licence'} complete={hasPool} disabled={!hasOrganisation} icon={Server} onClick={() => { if (hasPool) return; setLicenceMessage(true); }} />
+        <TeacherOnboardingItem title="Invite your first students" description="Send your first invitation from the Classroom tab. This step unlocks once the organisation has a pool." action="Open classroom" complete={hasInvitation} disabled={!hasOrganisation || !hasPool} icon={MailPlus} onClick={openClassroom} />
+      </section>
+
+      <section className="rounded-2xl border border-ludo-cyan/25 bg-[#06101d]/95 p-5 md:p-7">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div><h3 className="font-orbitron text-lg font-bold text-white">Choose your play environment</h3><p className="mt-1 font-grotesk text-sm text-white/55">Complete the setup for the environments included in your licence.</p></div>
+          <div className="flex gap-2 rounded-lg border border-white/10 p-1">
+            <button type="button" onClick={() => setActiveTab('local')} className={`inline-flex items-center gap-2 px-4 py-2 font-orbitron text-[10px] uppercase tracking-widest ${activeTab === 'local' ? 'bg-ludo-cyan text-ludo-deep' : 'text-white/60'}`}><Download size={14} /> Local</button>
+            <button type="button" disabled={!hasCloudAccess} onClick={() => setActiveTab('cloud')} className={`inline-flex items-center gap-2 px-4 py-2 font-orbitron text-[10px] uppercase tracking-widest ${!hasCloudAccess ? 'cursor-not-allowed text-white/20' : activeTab === 'cloud' ? 'bg-ludo-cyan text-ludo-deep' : 'text-white/60'}`}><Cloud size={14} /> Cloud</button>
+          </div>
+        </div>
+        <div className="mt-5 space-y-4">
+          {activeTab === 'local' ? <>
+            <TeacherOnboardingItem title="Install the launcher and game" description="Open the launcher download page, install The Odyssey, and test the local game." action="Download launcher" complete={completion.local === true} disabled={!hasOrganisation || !hasPool} icon={Download} onClick={() => markAndOpen('local', launcherDownloadPath)} />
+            <TeacherOnboardingItem title="Monitor your students" description="Open the teacher dashboard to monitor student progress and activity." action="Open dashboard" complete={completion.localMonitor === true} disabled={!hasOrganisation || !hasPool || !hasInvitation} icon={LayoutDashboard} onClick={() => markAndOpen('localMonitor', '/account/teacher/dashboard')} />
+          </> : <>
+            <TeacherOnboardingItem title="Test the Odyssey cloud" description="Open the Odyssey online page and launch a cloud session." action="Open cloud play" complete={completion.cloud === true} disabled={!hasOrganisation || !hasPool || !hasInvitation || !hasCloudAccess} icon={ExternalLink} onClick={() => markAndOpen('cloud', '/account/manage#cloud-play')} />
+            <TeacherOnboardingItem title="Monitor your students" description="Open the teacher dashboard to monitor students using cloud play." action="Open dashboard" complete={completion.cloudMonitor === true} disabled={!hasOrganisation || !hasPool || !hasInvitation || !hasCloudAccess} icon={LayoutDashboard} onClick={() => markAndOpen('cloudMonitor', '/account/teacher/dashboard')} />
+          </>}
+          {!hasCloudAccess && <p className="rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3 font-grotesk text-sm text-white/45">Cloud play is greyed out because this licence does not include cloud access.</p>}
+        </div>
+      </section>
+
+      {licenceMessage && <div role="alertdialog" className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-6"><div className="max-w-md rounded-2xl border border-ludo-cyan/40 bg-[#06101d] p-7 shadow-2xl"><h2 className="font-orbitron text-xl font-bold text-white">Licence pool pending</h2><p className="mt-3 font-grotesk text-sm leading-relaxed text-white/70">Please wait for our admins to assign you a licence or contact us at licenses@ludobotics.com.</p><button type="button" onClick={() => setLicenceMessage(false)} className="mt-6 border border-ludo-cyan px-5 py-2.5 font-orbitron text-xs uppercase tracking-widest text-ludo-cyan">Close</button></div></div>}
+    </div>
+  );
+};
+
 const AccountActionCard: React.FC<{
   eyebrow: string;
   title: string;
@@ -468,8 +702,9 @@ const AccountActionCard: React.FC<{
   href?: string;
   onClick?: () => void;
   featured?: boolean;
-}> = ({ eyebrow, title, description, action, href, onClick, featured = false }) => {
-  const className = `group flex min-h-56 flex-col rounded-2xl border p-6 text-left transition-all ${featured ? 'border-ludo-cyan/40 bg-gradient-to-br from-ludo-cyan/10 to-ludo-blue/5 hover:border-ludo-cyan' : 'border-white/10 bg-ludo-panel hover:border-ludo-cyan/45'}`;
+  className?: string;
+}> = ({ eyebrow, title, description, action, href, onClick, featured = false, className: cardClassName = '' }) => {
+  const className = `group flex min-h-56 flex-col rounded-2xl border p-6 text-left transition-all ${featured ? 'border-ludo-cyan/40 bg-gradient-to-br from-ludo-cyan/10 to-ludo-blue/5 hover:border-ludo-cyan' : 'border-white/10 bg-ludo-panel hover:border-ludo-cyan/45'} ${cardClassName}`;
   const content = (
     <>
       <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-ludo-cyan">{eyebrow}</span>
@@ -642,11 +877,32 @@ interface CloudSession {
   public_session_id: string;
   state: CloudSessionState;
   runtime_profile: string;
+  queue_position?: number | null;
   requested_at: string;
   updated_at: string;
   expires_at: string;
   failure_code?: string | null;
   safe_failure_message?: string | null;
+}
+
+interface CloudAccess {
+  can_access_cloud: boolean;
+  cloud_access_reason?: string | null;
+  cloud_credit?: CloudCreditSnapshot | null;
+  license_status?: string | null;
+  license_expires_at?: string | null;
+  entitlement_expires_at?: string | null;
+}
+
+interface CloudCreditSnapshot {
+  period_start: string;
+  allocated_seconds: number;
+  adjustment_seconds: number;
+  used_seconds: number;
+  remaining_seconds: number;
+  total_seconds: number;
+  percent_used: number;
+  exhausted: boolean;
 }
 
 const backendBaseUrl = String(
@@ -658,9 +914,13 @@ const backendBaseUrl = String(
 const CloudPlayPanel: React.FC = () => {
   const { getToken } = useAuth();
   const [session, setSession] = React.useState<CloudSession | null>(null);
+  const [cloudAccess, setCloudAccess] = React.useState<CloudAccess | null>(null);
+  const [cloudCredit, setCloudCredit] = React.useState<CloudCreditSnapshot | null>(null);
   const [statusText, setStatusText] = React.useState('Checking cloud access');
   const [isBusy, setIsBusy] = React.useState(false);
+  const [isRequestingAccess, setIsRequestingAccess] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
+  const [launchUrl, setLaunchUrl] = React.useState<string | null>(null);
   const [stoppingSessionId, setStoppingSessionId] = React.useState<string | null>(null);
   const launchKeyRef = React.useRef(`website-${randomId()}`);
   const refreshRequestRef = React.useRef(0);
@@ -697,6 +957,10 @@ const CloudPlayPanel: React.FC = () => {
     const requestId = ++refreshRequestRef.current;
     setError(null);
     try {
+      const access = await requestBackend('/me/access');
+      if (requestId !== refreshRequestRef.current) return;
+      setCloudAccess(access);
+      setCloudCredit(access?.cloud_credit ?? null);
       const payload = await requestBackend('/cloud/sessions/current');
       if (requestId !== refreshRequestRef.current) return;
       const nextSession = payload?.session ?? null;
@@ -704,11 +968,16 @@ const CloudPlayPanel: React.FC = () => {
       setSession(nextSession);
       if (!nextSession || ['terminated', 'failed', 'expired'].includes(nextSession.state)) {
         launchKeyRef.current = `website-${randomId()}`;
+        setLaunchUrl(null);
       }
       if (!nextSession || ['terminated', 'failed', 'expired'].includes(nextSession.state) || nextSession.public_session_id !== stoppingSessionId) {
         setStoppingSessionId(null);
       }
-      setStatusText(nextSession ? publicCloudStatus(nextSession) : 'No active cloud session');
+      setStatusText(nextSession
+        ? publicCloudStatus(nextSession)
+        : access?.can_access_cloud === true
+          ? 'No active cloud session'
+          : cloudAccessStatus(access?.cloud_access_reason));
     } catch (err) {
       if (requestId !== refreshRequestRef.current) return;
       const currentSession = sessionRef.current;
@@ -752,11 +1021,11 @@ const CloudPlayPanel: React.FC = () => {
       const nextSession = payload.session as CloudSession;
       sessionRef.current = nextSession;
       setSession(nextSession);
+      setLaunchUrl(null);
       setStatusText(publicCloudStatus(nextSession));
-      if (nextSession.state === 'ready' || nextSession.state === 'active') {
-        await openLaunchUrl(nextSession);
-      }
     } catch (err) {
+      launchWindowRef.current?.close();
+      launchWindowRef.current = null;
       setError(err instanceof Error ? err.message : 'Odyssey cloud launch failed.');
     } finally {
       setIsBusy(false);
@@ -777,9 +1046,10 @@ const CloudPlayPanel: React.FC = () => {
       if (!launchUrl || (!launchUrl.startsWith('/cloud/session/') && !launchUrl.startsWith('http'))) {
         throw new Error('Cloud launch URL was not issued.');
       }
-      window.location.assign(launchUrl);
+      setLaunchUrl(launchUrl.startsWith('http') ? launchUrl : `${backendBaseUrl}${launchUrl}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Cloud session is not ready yet.');
+      await refreshSession();
     } finally {
       setIsBusy(false);
     }
@@ -814,6 +1084,30 @@ const CloudPlayPanel: React.FC = () => {
     }
   };
 
+  const requestCloudAccess = async () => {
+    setIsRequestingAccess(true);
+    setError(null);
+    try {
+      const access = await requestBackend('/cloud/sessions/access/request', { method: 'POST' });
+      setCloudAccess(access);
+      setCloudCredit(access?.cloud_credit ?? null);
+      setStatusText(access?.can_access_cloud ? 'Cloud access granted. You can start an online session.' : cloudAccessStatus(access?.cloud_access_reason));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Cloud access could not be granted.');
+    } finally {
+      setIsRequestingAccess(false);
+    }
+  };
+
+  const canRequestCloudAccess = cloudAccess?.can_access_cloud !== true
+    && (
+      cloudAccess?.cloud_access_request_available === true
+      || (
+        cloudAccess?.organisation_has_cloud_pool === true
+        && (cloudAccess?.cloud_available_seats ?? 0) > 0
+      )
+    );
+
   const isStopping = Boolean(
     session
     && (
@@ -821,25 +1115,79 @@ const CloudPlayPanel: React.FC = () => {
       || stoppingSessionId === session.public_session_id
     ),
   );
+
   const canOpen = Boolean(session && (session.state === 'ready' || session.state === 'active') && !isStopping);
   const canTerminate = Boolean(session && !isStopping && !['terminated', 'failed', 'expired'].includes(session.state));
   const isPending = Boolean(session && ['requested', 'waiting_for_capacity', 'reserved', 'provisioning'].includes(session.state));
-  const isLaunchBlocked = isBusy || isPending || isStopping;
+  const isLaunchBlocked = isBusy || isPending || isStopping || cloudAccess?.can_access_cloud !== true;
+  const licenseExpiry = cloudAccess?.license_expires_at ?? cloudAccess?.entitlement_expires_at ?? null;
+  const licenseStatus = cloudAccess?.license_status ?? null;
+  const formattedExpiry = licenseExpiry ? formatLicenseDate(licenseExpiry) : null;
 
   return (
-    <section className="bg-ludo-panel border border-ludo-cyan/30 rounded-xl p-5" aria-live="polite">
+    <section id="cloud-play" className="bg-ludo-panel border border-ludo-cyan/30 rounded-xl p-5" aria-live="polite">
       <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
         <div>
           <span className="font-mono text-xs text-ludo-cyan uppercase tracking-widest">Cloud play</span>
           <h2 className="font-orbitron text-2xl text-white font-bold mt-2">Launch Odyssey online</h2>
           <p className="font-grotesk text-white/75 text-sm mt-1">{statusText}</p>
+          {cloudAccess && (licenseStatus || formattedExpiry) && (
+            <div className="mt-3 flex flex-wrap gap-x-5 gap-y-1 font-grotesk text-xs text-white/60" aria-label="Licence status">
+              {licenseStatus && <span>Licence: <strong className={licenseStatus === 'expired' ? 'text-ludo-orange' : 'text-white/85'}>{formatLicenseStatus(licenseStatus)}</strong></span>}
+              {formattedExpiry && <span>{licenseStatus === 'expired' ? 'Expired on' : 'Expires on'} <strong className="text-white/85">{formattedExpiry}</strong></span>}
+              {!formattedExpiry && licenseStatus !== 'expired' && <span>No expiry date</span>}
+            </div>
+          )}
+          {cloudCredit && (
+            <div className="mt-4 max-w-xl" aria-label="Monthly cloud credit usage">
+              <div className="flex justify-between font-mono text-xs text-white/65 mb-2">
+                <span>Monthly cloud credit</span>
+                <span>{formatCreditDuration(cloudCredit.remaining_seconds)} remaining</span>
+              </div>
+              <div className="h-2 rounded-full bg-white/10 overflow-hidden">
+                <div
+                  className={`h-full transition-all ${cloudCredit.percent_used >= 90 ? 'bg-ludo-orange' : 'bg-ludo-cyan'}`}
+                  style={{ width: `${Math.min(100, Math.max(0, cloudCredit.percent_used))}%` }}
+                />
+              </div>
+              {cloudCredit.exhausted ? (
+                <p className="font-grotesk text-ludo-orange text-xs mt-2">Your monthly cloud credit is used. Cloud play returns next month or after an administrator reset.</p>
+              ) : cloudCredit.remaining_seconds <= 15 * 60 ? (
+                <p className="font-grotesk text-ludo-orange text-xs mt-2">Your cloud session will stop when the remaining credit is used.</p>
+              ) : null}
+            </div>
+          )}
           {error && <p className="font-grotesk text-ludo-orange text-sm mt-3">{error}</p>}
           {session?.public_session_id && (
             <p className="font-mono text-xs text-white/60 mt-3">Session {session.public_session_id}</p>
           )}
         </div>
         <div className="flex flex-col gap-3 sm:flex-row">
-          {canOpen ? (
+          {cloudAccess?.can_access_cloud !== true && !session && canRequestCloudAccess ? (
+            <button
+              type="button"
+              onClick={() => void requestCloudAccess()}
+              disabled={isBusy || isRequestingAccess}
+              className="inline-flex items-center justify-center gap-2 border border-ludo-cyan bg-ludo-cyan text-ludo-deep px-5 py-3 font-orbitron text-sm uppercase tracking-widest hover:bg-transparent hover:text-ludo-cyan transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+              aria-label="Ask for cloud access"
+            >
+              {isRequestingAccess ? 'Requesting access…' : 'Ask to access online'}
+            </button>
+          ) : cloudAccess?.can_access_cloud !== true && !session ? (
+            <div className="border border-white/20 text-white/70 px-5 py-3 font-orbitron text-sm uppercase tracking-widest" role="status">
+              Cloud play unavailable
+            </div>
+          ) : canOpen && launchUrl ? (
+            <a
+              href={launchUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center gap-2 border border-ludo-cyan bg-ludo-cyan text-ludo-deep px-5 py-3 font-orbitron text-sm uppercase tracking-widest hover:bg-transparent hover:text-ludo-cyan transition-colors"
+              aria-label="Open Odyssey cloud session"
+            >
+              <Play size={16} /> Open session
+            </a>
+          ) : canOpen ? (
             <button
               type="button"
               onClick={() => void openLaunchUrl()}
@@ -857,7 +1205,12 @@ const CloudPlayPanel: React.FC = () => {
               className="inline-flex items-center justify-center gap-2 border border-ludo-cyan bg-ludo-cyan text-ludo-deep px-5 py-3 font-orbitron text-sm uppercase tracking-widest hover:bg-transparent hover:text-ludo-cyan transition-colors disabled:cursor-not-allowed disabled:opacity-50"
               aria-label="Start Odyssey cloud session"
             >
-              <Play size={16} /> {isStopping ? 'Stopping' : isPending ? 'Starting' : 'Play online'}
+              {isStopping || isPending ? (
+                <LoaderCircle size={16} className="animate-spin" aria-hidden="true" />
+              ) : (
+                <Play size={16} aria-hidden="true" />
+              )}
+              <span>{isStopping ? 'Stopping' : isPending ? 'Starting' : 'Play online'}</span>
             </button>
           )}
           {canTerminate && (
@@ -886,6 +1239,9 @@ const randomId = () => {
 
 const publicCloudStatus = (session: CloudSession) => {
   if (session.state === 'requested' || session.state === 'waiting_for_capacity') {
+    if (session.queue_position && session.queue_position > 0) {
+      return `Waiting for a cloud runtime slot. You are ${session.queue_position}${ordinalSuffix(session.queue_position)} in the queue.`;
+    }
     return 'Waiting for a cloud runtime slot.';
   }
   if (session.state === 'reserved' || session.state === 'provisioning') {
@@ -906,6 +1262,25 @@ const publicCloudStatus = (session: CloudSession) => {
   return 'No active cloud session';
 };
 
+const ordinalSuffix = (position: number) => {
+  const mod100 = position % 100;
+  if (mod100 >= 11 && mod100 <= 13) return 'th';
+  switch (position % 10) {
+    case 1: return 'st';
+    case 2: return 'nd';
+    case 3: return 'rd';
+    default: return 'th';
+  }
+};
+
+const formatCreditDuration = (seconds: number) => {
+  const minutes = Math.max(0, Math.ceil(seconds / 60));
+  const hours = Math.floor(minutes / 60);
+  const remainingMinutes = minutes % 60;
+  if (hours > 0) return `${hours}h ${remainingMinutes}m`;
+  return `${remainingMinutes}m`;
+};
+
 const cloudErrorMessage = (statusCode: number, payload: unknown) => {
   if (statusCode === 401) {
     return 'Sign in to launch Odyssey online.';
@@ -914,6 +1289,8 @@ const cloudErrorMessage = (statusCode: number, payload: unknown) => {
     return 'Cloud play is not available for this account yet.';
   }
   if (statusCode === 409) {
+    const reason = typeof payload === 'object' && payload && 'detail' in payload && typeof (payload as { detail?: unknown }).detail === 'object' && (payload as { detail?: { reason?: unknown } }).detail?.reason;
+    if (reason === 'cloud_seat_unavailable') return 'No cloud licence seat is available. Please contact your teacher.';
     return 'Cloud session is still preparing. Try opening it again in a moment.';
   }
   if (statusCode === 429) {
@@ -921,6 +1298,34 @@ const cloudErrorMessage = (statusCode: number, payload: unknown) => {
   }
   const detail = typeof payload === 'object' && payload && 'detail' in payload ? (payload as { detail?: unknown }).detail : null;
   return typeof detail === 'string' ? detail : 'Odyssey cloud is temporarily unavailable.';
+};
+
+const formatLicenseDate = (value: string) => {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return new Intl.DateTimeFormat('en-GB', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    timeZone: 'Europe/Paris',
+  }).format(date);
+};
+
+const formatLicenseStatus = (status: string) => {
+  if (status === 'active') return 'Active';
+  if (status === 'expired') return 'Expired';
+  if (status === 'scheduled') return 'Scheduled';
+  if (status === 'archived') return 'Archived';
+  return status.replace(/_/g, ' ').replace(/\b\w/g, letter => letter.toUpperCase());
+};
+
+export const cloudAccessStatus = (reason?: string | null) => {
+  if (reason === 'no_active_organisation') return 'Select an organisation to use cloud play.';
+  if (reason === 'cloud_credit_exhausted') return 'Your monthly cloud credit has been used.';
+  if (reason === 'cloud_entitlement_expired') return 'Cloud play is unavailable because your entitlement has expired.';
+  if (reason === 'cloud_entitlement_revoked') return 'Cloud play is unavailable because your entitlement was revoked.';
+  if (reason === 'cloud_entitlement_missing' || reason === 'no_subscription') return 'Please contact your teacher to get a cloud licence.';
+  return 'Cloud play is not included with this account.';
 };
 
 const OrganizationMemberSummary: React.FC<{ organizationName: string; role?: string | null }> = ({ organizationName, role }) => {
