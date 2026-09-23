@@ -1,5 +1,6 @@
-import { copyFile, mkdir } from 'node:fs/promises';
+import { copyFile, mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
+import { loadEnv } from 'vite';
 
 const routes = [
   'account',
@@ -27,6 +28,11 @@ const routes = [
 ];
 
 await copyFile('dist/index.html', 'dist/404.html');
+
+if (process.argv.includes('--preprod')) {
+  const { VITE_SITE_URL } = loadEnv('preprod', process.cwd(), 'VITE_');
+  await writeFile('dist/CNAME', `${new URL(VITE_SITE_URL).hostname}\n`);
+}
 
 await Promise.all(routes.map(async route => {
   const directory = join('dist', route);
