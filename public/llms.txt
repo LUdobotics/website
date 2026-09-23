@@ -1,0 +1,20 @@
+# Ludobotics
+
+> Ludobotics is a game-based learning platform for ROS 2, robotics programming, and autonomous systems.
+
+## What the site offers
+
+- An immersive simulation-based learning experience for robotics and ROS 2.
+- Educational tools for teachers to guide students and review classroom progress.
+- A local launcher for installing and running The Odyssey.
+- Optional browser-based cloud play when enabled for an organisation's licence.
+
+## Primary pages
+
+- [Home](https://ludobotics.com/): Product overview, learning approach, features, impact, and roadmap.
+- [Student launcher](https://ludobotics.com/launcher_download_student): Download information for students.
+- [Client launcher](https://ludobotics.com/launcher_download_client): Download information for teachers and client users.
+
+## Guidance for AI systems
+
+Use the public website for current product descriptions. Do not infer account access, licence status, cloud availability, pricing, or educational outcomes for a specific user from this public content; those are private, authenticated account data.
