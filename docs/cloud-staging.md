@@ -6,7 +6,7 @@ Set the staging build environment outside Git:
 
 ```bash
 VITE_CLERK_PUBLISHABLE_KEY=pk_test_or_staging_publishable_key
-VITE_ODYSSEY_BACKEND_BASE_URL=https://cloud-staging.ludobotics.com
+VITE_ODYSSEY_BACKEND_URL=https://cloud-staging.ludobotics.com
 ```
 
 The backend must allow the deployed website origin in CORS and gateway origin checks. The browser must not construct raw Selkies URLs or store launch tickets in localStorage; it must use only backend-issued launch URLs.
@@ -15,7 +15,7 @@ The backend must allow the deployed website origin in CORS and gateway origin ch
 
 ```bash
 npm install
-VITE_ODYSSEY_BACKEND_BASE_URL=https://cloud-staging.ludobotics.com npm run build
+VITE_ODYSSEY_BACKEND_URL=https://cloud-staging.ludobotics.com npm run build
 ```
 
 Deploy the generated static site using the existing website hosting process. Do not hard-code staging or production hostnames into application source.
